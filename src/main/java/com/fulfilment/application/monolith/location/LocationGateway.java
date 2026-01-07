@@ -20,9 +20,11 @@ public class LocationGateway implements LocationResolver {
     locations.add(new Location("VETSBY-001", 1, 90));
   }
 
-  @Override
-  public Location resolveByIdentifier(String identifier) {
-    // TODO implement this method
-    throw new UnsupportedOperationException("Unimplemented method 'resolveByIdentifier'");
-  }
+@Override
+public Location resolveByIdentifier(String identifier) {
+    return locations.stream()
+        .filter(location -> location.identifier().equals(identifier))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Location not found: " + identifier));
+ }
 }
