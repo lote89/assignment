@@ -1,34 +1,74 @@
 package com.fulfilment.application.monolith.warehouses.adapters.database;
 
 import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
+import com.fulfilment.application.monolith.warehouses.domain.models.Location;  // Assume import
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @ApplicationScoped
 public class WarehouseRepository implements WarehouseStore, PanacheRepository<DbWarehouse> {
 
   @Override
+  @Transactional
   public void create(Warehouse warehouse) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'create'");
+    if (existsByBusinessUnitCode(warehouse.businessUnitCode())) {
+      throw new IllegalStateException("Business unit code already exists");
+    }
+    DbWarehouse db = new DbWarehouse();
+    mapToDb(warehouse, db);
+    db.createdAt = LocalDateTime.now();
+    db.persist();
   }
 
   @Override
+  @Transactional
   public void update(Warehouse warehouse) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'replace'");
+    DbWarehouse db = findDbById(warehouse.id())
+        .orElseThrow(() -> new IllegalStateException("Warehouse not found"));
+    mapToDb(warehouse, db);
+    db.persist();
   }
 
   @Override
+  @Transactional
   public void remove(Warehouse warehouse) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'remove'");
+    DbWarehouse db = findDbById(warehouse.id())
+        .orElseThrow(() -> new IllegalStateException("Warehouse not found"));
+    db.archivedAt = LocalDateTime.now();
+    db.persist();
   }
 
   @Override
   public Warehouse findByBusinessUnitCode(String buCode) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'findById'");
+    DbWarehouse db = DbWarehouse.find("businessUnitCode = ?1 and archivedAt is null", buCode).firstResult();
+    return db == null ? null : mapToDomain(db);
+  }
+
+  public long countActiveByLocation(String locationId) {
+    return count("location = ?1 and archivedAt is null", locationId);
+  }
+
+  public Optional<DbWarehouse> findDbById(Long id) {
+    return find("id = ?1 and archivedAt is null", id).firstResultOptional();
+  }
+
+  public boolean existsByBusinessUnitCode(String buCode) {
+    return count("businessUnitCode = ?1 and archivedAt is null", buCode) > 0;
+  }
+
+  private void mapToDb(Warehouse source, DbWarehouse target) {
+    target.businessUnitCode = source.businessUnitCode();
+    target.location = source.locationId();
+    target.capacity = source.capacity();
+    target.stock = source.stock();
+  }
+
+  private Warehouse mapToDomain(DbWarehouse db) {
+    return new Warehouse(db.id, db.businessUnitCode, db.location, db.capacity, db.stock);  // Adjust constructor
   }
 }
