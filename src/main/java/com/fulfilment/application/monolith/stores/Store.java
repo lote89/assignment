@@ -19,4 +19,7 @@ public class Store extends PanacheEntity {
   public Store(String name) {
     this.name = name;
   }
+  public Long id() {
+    return id; 
+  }
 }
