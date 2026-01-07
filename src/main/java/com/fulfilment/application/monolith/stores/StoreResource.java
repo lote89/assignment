@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
@@ -28,6 +29,7 @@ import org.jboss.logging.Logger;
 public class StoreResource {
 
   @Inject LegacyStoreManagerGateway legacyStoreManagerGateway;
+  @Inject Event<StoreChangedEvent> storeEvent;
 
   private static final Logger LOGGER = Logger.getLogger(StoreResource.class.getName());
 
@@ -54,8 +56,7 @@ public class StoreResource {
     }
 
     store.persist();
-
-    legacyStoreManagerGateway.createStoreOnLegacySystem(store);
+    storeEvent.fire(new StoreChangedEvent(store, Operation.CREATED));
 
     return Response.ok(store).status(201).build();
   }
@@ -77,7 +78,8 @@ public class StoreResource {
     entity.name = updatedStore.name;
     entity.quantityProductsInStock = updatedStore.quantityProductsInStock;
 
-    legacyStoreManagerGateway.updateStoreOnLegacySystem(updatedStore);
+    entity.persist();  // Explicit persist for updates
+    storeEvent.fire(new StoreChangedEvent(entity, Operation.UPDATED));
 
     return entity;
   }
@@ -96,15 +98,16 @@ public class StoreResource {
       throw new WebApplicationException("Store with id of " + id + " does not exist.", 404);
     }
 
-    if (entity.name != null) {
+    if (updatedStore.name != null) {
       entity.name = updatedStore.name;
     }
 
-    if (entity.quantityProductsInStock != 0) {
+    if (updatedStore.quantityProductsInStock != null) {
       entity.quantityProductsInStock = updatedStore.quantityProductsInStock;
     }
 
-    legacyStoreManagerGateway.updateStoreOnLegacySystem(updatedStore);
+    entity.persist();  // Explicit persist for partial updates
+    storeEvent.fire(new StoreChangedEvent(entity, Operation.UPDATED));
 
     return entity;
   }
@@ -118,6 +121,7 @@ public class StoreResource {
       throw new WebApplicationException("Store with id of " + id + " does not exist.", 404);
     }
     entity.delete();
+    storeEvent.fire(new StoreChangedEvent(entity, Operation.DELETED));
     return Response.status(204).build();
   }
 
