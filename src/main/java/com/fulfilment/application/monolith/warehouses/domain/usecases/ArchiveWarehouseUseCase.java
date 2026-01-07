@@ -4,6 +4,8 @@ import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.ArchiveWarehouseOperation;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.time.ZonedDateTime;
+import com.fulfilment.application.monolith.warehouses.domain.exceptions.WarehouseDomainException;
 
 @ApplicationScoped
 public class ArchiveWarehouseUseCase implements ArchiveWarehouseOperation {
@@ -14,10 +16,10 @@ public class ArchiveWarehouseUseCase implements ArchiveWarehouseOperation {
     this.warehouseStore = warehouseStore;
   }
 
+ 
   @Override
   public void archive(Warehouse warehouse) {
-    // TODO implement this method
-
-    warehouseStore.update(warehouse);
+    warehouse.archivedAt = ZonedDateTime.now();  
+    warehouseStore.update(warehouse); 
   }
 }
