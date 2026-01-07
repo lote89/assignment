@@ -7,43 +7,42 @@ import java.nio.file.Path;
 @ApplicationScoped
 public class LegacyStoreManagerGateway {
 
+  public void create(Store store) {
+    createStoreOnLegacySystem(store);  
+  }
+
+  public void update(Store store) {
+    updateStoreOnLegacySystem(store);
+  }
+
+  public void delete(Long id) {
+    
+    try {
+      Path tempFile = Files.createTempFile("store-delete-" + id, ".txt");
+      Files.write(tempFile, ("Store deleted: ID=" + id).getBytes());
+      Files.delete(tempFile);
+      System.out.println("Legacy delete emulated for Store ID: " + id);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   public void createStoreOnLegacySystem(Store store) {
-    // just to emulate as this would send this to a legacy system, let's write a temp file with the
-    writeToFile(store);
+    writeToFile(store, "CREATED");
   }
 
   public void updateStoreOnLegacySystem(Store store) {
-    // just to emulate as this would send this to a legacy system, let's write a temp file with the
-    writeToFile(store);
+    writeToFile(store, "UPDATED");
   }
 
-  private void writeToFile(Store store) {
+  private void writeToFile(Store store, String operation) {
     try {
-      // Step 1: Create a temporary file
-      Path tempFile;
-
-      tempFile = Files.createTempFile(store.name, ".txt");
-
-      System.out.println("Temporary file created at: " + tempFile.toString());
-
-      // Step 2: Write data to the temporary file
-      String content =
-          "Store created. [ name ="
-              + store.name
-              + " ] [ items on stock ="
-              + store.quantityProductsInStock
-              + "]";
+      Path tempFile = Files.createTempFile(store.name + "-" + operation, ".txt");
+      String content = String.format("Store %s. [ name = %s ] [ items on stock = %d ]", 
+          operation, store.name, store.quantityProductsInStock);
       Files.write(tempFile, content.getBytes());
-      System.out.println("Data written to temporary file.");
-
-      // Step 3: Optionally, read the data back to verify
-      String readContent = new String(Files.readAllBytes(tempFile));
-      System.out.println("Data read from temporary file: " + readContent);
-
-      // Step 4: Delete the temporary file when done
+      System.out.println(content);
       Files.delete(tempFile);
-      System.out.println("Temporary file deleted.");
-
     } catch (Exception e) {
       e.printStackTrace();
     }
