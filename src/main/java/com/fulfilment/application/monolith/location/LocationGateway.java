@@ -25,6 +25,7 @@ public Location resolveByIdentifier(String identifier) {
     return locations.stream()
         .filter(location -> location.identifier().equals(identifier))
         .findFirst()
-        .orElseThrow(() -> new IllegalArgumentException("Location not found: " + identifier));
+        .orElseThrow(() -> new LocationNotFoundException("Location not found: " + identifier));
+        
  }
 }
