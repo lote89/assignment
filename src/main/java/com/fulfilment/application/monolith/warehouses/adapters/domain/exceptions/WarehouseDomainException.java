@@ -6,7 +6,15 @@ public class WarehouseDomainException extends RuntimeException {
         super(message);
     }
 
-    public WarehouseDomainException(String message, Throwable cause) {
-        super(message, cause);
+    public LocationNotFoundException(String message) {
+        super(message);
+    }
+
+     public WarehouseCapacityExceededException(String message) {
+        super(message);
+    }
+
+    public WarehouseLimitExceededException(String message) {
+        super(message);
     }
 }
