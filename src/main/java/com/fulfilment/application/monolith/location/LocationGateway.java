@@ -4,6 +4,7 @@ import com.fulfilment.application.monolith.warehouses.domain.models.Location;
 import com.fulfilment.application.monolith.warehouses.domain.ports.LocationResolver;
 import java.util.ArrayList;
 import java.util.List;
+import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions.LocationNotFoundException;
 
 public class LocationGateway implements LocationResolver {
 
