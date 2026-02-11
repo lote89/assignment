@@ -1,8 +1,8 @@
 package com.fulfilment.application.monolith.warehouses.domain.usecases;
 
-import com.fulfilment.application.monolith.warehouses.domain.exceptions.WarehouseCapacityExceededException;
-import com.fulfilment.application.monolith.warehouses.domain.exceptions.WarehouseDomainException;
-import com.fulfilment.application.monolith.warehouses.domain.exceptions.WarehouseLimitExceededException;
+import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions.WarehouseCapacityExceededException;
+import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions.WarehouseDomainException;
+import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions.WarehouseLimitExceededException;
 import com.fulfilment.application.monolith.warehouses.domain.models.Location;
 import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.CreateWarehouseOperation;
