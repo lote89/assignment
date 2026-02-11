@@ -5,7 +5,8 @@ import com.fulfilment.application.monolith.warehouses.domain.ports.ArchiveWareho
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.time.ZonedDateTime;
-import com.fulfilment.application.monolith.warehouses.domain.exceptions.WarehouseDomainException;
+import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions.WarehouseDomainException;
+
 
 @ApplicationScoped
 public class ArchiveWarehouseUseCase implements ArchiveWarehouseOperation {
