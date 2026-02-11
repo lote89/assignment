@@ -2,7 +2,6 @@ package com.fulfilment.application.monolith.warehouses.domain.usecases;
 
 import com.fulfilment.application.monolith.warehouses.domain.exceptions.WarehouseCapacityExceededException;
 import com.fulfilment.application.monolith.warehouses.domain.exceptions.WarehouseDomainException;
-import com.fulfilment.application.monolith.warehouses.domain.exceptions.WarehouseLimitExceededException;
 import com.fulfilment.application.monolith.warehouses.domain.models.Location;
 import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.LocationResolver;
@@ -13,67 +12,67 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class CreateWarehouseUseCaseTest {
+class ReplaceWarehouseUseCaseTest {
 
     private WarehouseStore warehouseStore;
+    private ArchiveWarehouseUseCase archiveUseCase;
     private LocationResolver locationResolver;
-    private CreateWarehouseUseCase useCase;
+    private ReplaceWarehouseUseCase useCase;
 
     @BeforeEach
     void setUp() {
         warehouseStore = mock(WarehouseStore.class);
+        archiveUseCase = mock(ArchiveWarehouseUseCase.class);
         locationResolver = mock(LocationResolver.class);
-        useCase = new CreateWarehouseUseCase(warehouseStore, locationResolver);
+        useCase = new ReplaceWarehouseUseCase(warehouseStore, archiveUseCase, locationResolver);
     }
 
     @Test
-    void shouldCreateWarehouseWhenValid() {
-        Warehouse warehouse = new Warehouse("BU-1", "AMSTERDAM-001", 50, 10);
-
+    void shouldReplaceWarehouseWhenValid() {
+        Warehouse oldWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 50, 10);
+        Warehouse newWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 60, 10);
         Location location = new Location("AMSTERDAM-001", 5, 100);
 
-        when(warehouseStore.existsByBusinessUnitCode("BU-1")).thenReturn(false);
+        when(warehouseStore.findByBusinessUnitCode("BU-1")).thenReturn(oldWarehouse);
         when(locationResolver.resolveByIdentifier("AMSTERDAM-001")).thenReturn(location);
-        when(warehouseStore.countActiveByLocation("AMSTERDAM-001")).thenReturn(2L);
 
-        useCase.create(warehouse);
+        useCase.replace(newWarehouse);
 
-        verify(warehouseStore).create(warehouse);
-        assertNotNull(warehouse.creationAt);
+        verify(archiveUseCase).archive(oldWarehouse);
+        verify(warehouseStore).update(newWarehouse);
+        assertNotNull(newWarehouse.creationAt);
     }
 
     @Test
-    void shouldFailWhenBusinessUnitExists() {
-        Warehouse warehouse = new Warehouse("BU-1", "AMSTERDAM-001", 50, 10);
+    void shouldFailWhenWarehouseNotFound() {
+        Warehouse newWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 60, 10);
 
-        when(warehouseStore.existsByBusinessUnitCode("BU-1")).thenReturn(true);
+        when(warehouseStore.findByBusinessUnitCode("BU-1")).thenReturn(null);
 
-        assertThrows(WarehouseDomainException.class, () -> useCase.create(warehouse));
-        verify(warehouseStore, never()).create(any());
+        assertThrows(WarehouseDomainException.class, () -> useCase.replace(newWarehouse));
     }
 
     @Test
-    void shouldFailWhenMaxWarehousesReached() {
-        Warehouse warehouse = new Warehouse("BU-1", "AMSTERDAM-001", 50, 10);
-        Location location = new Location("AMSTERDAM-001", 2, 100);
-
-        when(warehouseStore.existsByBusinessUnitCode("BU-1")).thenReturn(false);
-        when(locationResolver.resolveByIdentifier("AMSTERDAM-001")).thenReturn(location);
-        when(warehouseStore.countActiveByLocation("AMSTERDAM-001")).thenReturn(2L);
-
-        assertThrows(WarehouseLimitExceededException.class, () -> useCase.create(warehouse));
-    }
-
-    @Test
-    void shouldFailWhenCapacityExceeded() {
-        Warehouse warehouse = new Warehouse("BU-1", "AMSTERDAM-001", 150, 10);
+    void shouldFailWhenCapacityExceededForLocation() {
+        Warehouse oldWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 50, 10);
+        Warehouse newWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 150, 10);
         Location location = new Location("AMSTERDAM-001", 5, 100);
 
-        when(warehouseStore.existsByBusinessUnitCode("BU-1")).thenReturn(false);
+        when(warehouseStore.findByBusinessUnitCode("BU-1")).thenReturn(oldWarehouse);
         when(locationResolver.resolveByIdentifier("AMSTERDAM-001")).thenReturn(location);
-        when(warehouseStore.countActiveByLocation("AMSTERDAM-001")).thenReturn(1L);
 
-        assertThrows(WarehouseCapacityExceededException.class, () -> useCase.create(warehouse));
+        assertThrows(WarehouseCapacityExceededException.class, () -> useCase.replace(newWarehouse));
+    }
+
+    @Test
+    void shouldFailWhenStockMismatch() {
+        Warehouse oldWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 50, 10);
+        Warehouse newWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 60, 5);
+        Location location = new Location("AMSTERDAM-001", 5, 100);
+
+        when(warehouseStore.findByBusinessUnitCode("BU-1")).thenReturn(oldWarehouse);
+        when(locationResolver.resolveByIdentifier("AMSTERDAM-001")).thenReturn(location);
+
+        assertThrows(WarehouseDomainException.class, () -> useCase.replace(newWarehouse));
     }
 }
-
