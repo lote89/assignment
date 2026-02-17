@@ -2,7 +2,6 @@ package com.fulfilment.application.monolith.warehouses.adapters.database;
 
 import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
-import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -18,7 +17,7 @@ public class WarehouseRepository implements WarehouseStore {
     @Transactional
     public void create(Warehouse warehouse) {
         if (existsByBusinessUnitCode(warehouse.businessUnitCode())) {
-            throw new IllegalStateException("Business unit code already exists");
+            throw new WarehouseDomainException("Warehouse not found");
         }
         DbWarehouse db = new DbWarehouse();
         mapToDb(warehouse, db);
