@@ -1,4 +1,4 @@
-package com.fulfilment.application.monolith.adapters.domain.exceptions;
+package com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
