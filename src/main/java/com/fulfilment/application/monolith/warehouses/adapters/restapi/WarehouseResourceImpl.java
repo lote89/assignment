@@ -38,8 +38,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
             throw new WarehouseDomainException("Business unit code already exists");
         }
 
-        Location loc = locationGateway.resolveByIdentifier(apiWh.getLocation())
-                .orElseThrow(() -> new WarehouseDomainException("Invalid location"));
+        Location loc = locationGateway.resolveByIdentifier(apiWh.getLocation());
 
         if (repo.countActiveByLocation(loc.identification()) >= loc.maxNumberOfWarehouses()) {
             throw new WarehouseDomainException("Maximum warehouses reached for location");
