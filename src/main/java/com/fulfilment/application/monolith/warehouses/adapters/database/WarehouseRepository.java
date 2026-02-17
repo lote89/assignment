@@ -4,7 +4,7 @@ import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-
+import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions.WarehouseDomainException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
