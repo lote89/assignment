@@ -1,7 +1,7 @@
 package com.fulfilment.application.monolith.warehouses.adapters.restapi;
 
 import com.fulfilment.application.monolith.location.LocationGateway;
-import com.fulfilment.application.monolith.warehouses.domain.WarehouseDomainException;
+import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions.WarehouseDomainException;
 import com.fulfilment.application.monolith.warehouses.domain.models.Location;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import com.warehouse.api.WarehouseResource;
