@@ -144,11 +144,11 @@ public class WarehouseResourceImpl implements WarehouseResource {
         repo.archive(domain.id());
     }
 
-    private Warehouse mapToDomain(Warehouse api, String locId) {
+    private com.fulfilment.application.monolith.warehouses.domain.models.Warehouse mapToDomain(Warehouse api, String locId) {
         return new Warehouse(null, api.getId(), locId, api.getCapacity(), api.getStock());
     }
 
-    private Warehouse mapToApi(Warehouse domain) {
+    private Warehouse mapToApi(com.fulfilment.application.monolith.warehouses.domain.models.Warehouse domain) {
         Warehouse api = new Warehouse();
         api.setId(domain.businessUnitCode());
         api.setLocation(domain.locationId());
