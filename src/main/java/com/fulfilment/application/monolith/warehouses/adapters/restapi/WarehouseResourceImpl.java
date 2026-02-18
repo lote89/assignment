@@ -92,3 +92,70 @@ public class WarehouseResourceImpl implements WarehouseResource {
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    public Warehouse replaceWarehouse(@PathParam("id") String id, @Valid Warehouse newApiWarehouse) {
+
+        com.fulfilment.application.monolith.warehouses.domain.models.Warehouse old =
+                repo.findByIdOptional(Long.parseLong(id))
+                        .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+
+        String newBu = newApiWarehouse.getId();
+        if (!newBu.equals(old.businessUnitCode()) && repo.existsByBusinessUnitCode(newBu)) {
+            throw new RuntimeException("Business unit code conflict");
+        }
+
+        Location loc = locationGateway.resolveByIdentifier(newApiWarehouse.getLocation())
+                .orElseThrow(() -> new RuntimeException("Invalid location"));
+
+        if (newApiWarehouse.getCapacity() > loc.maxCapacity()) {
+            throw new RuntimeException("Capacity exceeds location maximum");
+        }
+
+        if (newApiWarehouse.getCapacity() < newApiWarehouse.getStock()) {
+            throw new RuntimeException("Capacity cannot be lower than stock");
+        }
+
+        if (newApiWarehouse.getCapacity() < old.stock()) {
+            throw new RuntimeException("New capacity cannot accommodate previous stock");
+        }
+
+        if (!newApiWarehouse.getStock().equals(old.stock())) {
+            throw new RuntimeException("Stock must match previous warehouse");
+        }
+
+        // Update domain entity
+        old.updateFrom(new com.fulfilment.application.monolith.warehouses.domain.models.Warehouse(
+                old.id(),
+                newBu,
+                loc.identification(),
+                newApiWarehouse.getCapacity(),
+                newApiWarehouse.getStock(),
+                old.creationAt()
+        ));
+
+        repo.update(old);
+        return mapToApi(old);
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @Transactional
+    public void archiveAWarehouseUnitByID(@PathParam("id") String id) {
+        com.fulfilment.application.monolith.warehouses.domain.models.Warehouse domain =
+                repo.findByIdOptional(Long.parseLong(id))
+                        .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+        domain.archive();
+        repo.update(domain);
+    }
+
+    // --- Mapping method ---
+    private Warehouse mapToApi(com.fulfilment.application.monolith.warehouses.domain.models.Warehouse domain) {
+        Warehouse api = new Warehouse();
+        api.setId(domain.businessUnitCode());
+        api.setLocation(domain.locationId());
+        api.setCapacity(domain.capacity());
+        api.setStock(domain.stock());
+        return api;
+    }
+}
