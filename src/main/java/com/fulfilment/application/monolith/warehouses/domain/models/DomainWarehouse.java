@@ -24,4 +24,20 @@ public class DomainWarehouse {
     public void setCapacity(Integer capacity) { this.capacity = capacity; }
     public Integer getStock() { return stock; }
     public void setStock(Integer stock) { this.stock = stock; }
+
+    public void setCreationAt(ZonedDateTime creationAt) {
+    this.creationAt = creationAt;
+}
+
+public ZonedDateTime getCreationAt() {
+    return creationAt;
+}
+
+public ZonedDateTime getArchivedAt() {
+    return archivedAt;
+}
+
+public void archive() {
+    this.archivedAt = ZonedDateTime.now();
+}
 }
