@@ -41,23 +41,17 @@ public class WarehouseResourceImpl implements WarehouseResource {
         }
     }
 
-    @Override
-    @POST
-    @Path("/")
-    public com.warehouse.api.beans.Warehouse createANewWarehouseUnit(@Valid com.warehouse.api.beans.Warehouse request) {
-        
-        com.fulfilment.application.monolith.warehouses.domain.models.Warehouse domainWarehouse = 
-            new com.fulfilment.application.monolith.warehouses.domain.models.Warehouse(
-                null,
-                request.getBusinessUnitCode(),
-                request.getLocation(),
-                request.getCapacity(),
-                request.getStock(),
-                ZonedDateTime.now(),
-                null
-            );
-        repo.create(domainWarehouse);
-        return toApiWarehouse(domainWarehouse);
+   @Override
+   @POST
+   @Path("/")
+   public com.warehouse.api.beans.Warehouse createANewWarehouseUnit(@Valid com.warehouse.api.beans.Warehouse request) {
+    
+    Warehouse domainWarehouse = new Warehouse(
+        null, request.getBusinessUnitCode(), request.getLocation(),
+        request.getCapacity(), request.getStock(), ZonedDateTime.now(), null
+    );
+    repo.create(domainWarehouse);
+    return toApiWarehouse(domainWarehouse);
     }
 
     @Override
