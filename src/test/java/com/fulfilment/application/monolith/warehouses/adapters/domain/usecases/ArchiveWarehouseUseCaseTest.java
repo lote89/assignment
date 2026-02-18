@@ -1,6 +1,6 @@
 package com.fulfilment.application.monolith.warehouses.domain.usecases;
 
-import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
+import com.fulfilment.application.monolith.warehouses.domain.models.DomainWarehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class ArchiveWarehouseUseCaseTest {
 
     @Test
     void shouldArchiveWarehouse() {
-        Warehouse warehouse = new Warehouse("BU-1", "AMSTERDAM-001", 50, 10);
+        DomainWarehouse warehouse = new DomainWarehouse("BU-1", "AMSTERDAM-001", 50, 10);
 
         assertNull(warehouse.archivedAt);
 
@@ -35,10 +35,10 @@ class ArchiveWarehouseUseCaseTest {
 
     @Test
     void shouldSetArchiveTimeToNow() {
-        Warehouse warehouse = new Warehouse("BU-2", "ZWOLLE-001", 40, 5);
+        DomainWarehouse warehouse = new DomainWarehouse("BU-2", "ZWOLLE-001", 40, 5);
 
         useCase.archive(warehouse);
 
         ZonedDateTime now = ZonedDateTime.now();
         assertTrue(
-            warehouse
+            DomainWarehouse
