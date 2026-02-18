@@ -30,7 +30,9 @@ public class WarehouseResourceImpl implements WarehouseResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public ApiWarehouse createANewWarehouseUnit(@Valid ApiWarehouse apiWarehouse) {
+    public com.warehouse.api.beans.Warehouse createANewWarehouseUnit(
+            @Valid com.warehouse.api.beans.Warehouse apiWarehouse
+    ) {
 
         String buCode = apiWarehouse.getId();
 
@@ -54,7 +56,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
         }
 
         Warehouse domainWarehouse = new Warehouse(
-                null,
+                null, // id is generated
                 apiWarehouse.getId(),
                 loc.identification(),
                 apiWarehouse.getCapacity(),
@@ -63,12 +65,13 @@ public class WarehouseResourceImpl implements WarehouseResource {
         );
 
         repo.create(domainWarehouse);
+
         return mapToApi(domainWarehouse);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<ApiWarehouse> listAllWarehouseUnits() {
+    public List<com.warehouse.api.beans.Warehouse> listAllWarehouseUnits() {
         return repo.findAllActive()
                 .stream()
                 .map(this::mapToApi)
@@ -78,7 +81,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public ApiWarehouse getAWarehouseUnitByID(@NotNull @PathParam("id") String id) {
+    public com.warehouse.api.beans.Warehouse getAWarehouseUnitByID(@NotNull @PathParam("id") String id) {
         Warehouse domain = repo.findByIdOptional(Long.parseLong(id))
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
         return mapToApi(domain);
@@ -89,13 +92,16 @@ public class WarehouseResourceImpl implements WarehouseResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public ApiWarehouse replaceWarehouse(@PathParam("id") String id, @Valid ApiWarehouse newApiWarehouse) {
+    public com.warehouse.api.beans.Warehouse replaceWarehouse(
+            @PathParam("id") String id,
+            @Valid com.warehouse.api.beans.Warehouse newApiWarehouse
+    ) {
 
         Warehouse old = repo.findByIdOptional(Long.parseLong(id))
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));
 
         String newBu = newApiWarehouse.getId();
-        if (!newBu.equals(old.businessUnitCode()) && repo.existsByBusinessUnitCode(newBu)) {
+        if (!newBu.equals(old.businessUnitCode) && repo.existsByBusinessUnitCode(newBu)) {
             throw new RuntimeException("Business unit code conflict");
         }
 
@@ -110,24 +116,25 @@ public class WarehouseResourceImpl implements WarehouseResource {
             throw new RuntimeException("Capacity cannot be lower than stock");
         }
 
-        if (newApiWarehouse.getCapacity() < old.stock()) {
+        if (newApiWarehouse.getCapacity() < old.stock) {
             throw new RuntimeException("New capacity cannot accommodate previous stock");
         }
 
-        if (!newApiWarehouse.getStock().equals(old.stock())) {
+        if (!newApiWarehouse.getStock().equals(old.stock)) {
             throw new RuntimeException("Stock must match previous warehouse");
         }
 
         old.updateFrom(new Warehouse(
-                old.id(),
+                old.id,
                 newBu,
                 loc.identification(),
                 newApiWarehouse.getCapacity(),
                 newApiWarehouse.getStock(),
-                old.creationAt()
+                old.creationAt
         ));
 
         repo.update(old);
+
         return mapToApi(old);
     }
 
@@ -141,13 +148,12 @@ public class WarehouseResourceImpl implements WarehouseResource {
         repo.update(domain);
     }
 
-    private ApiWarehouse mapToApi(Warehouse domain) {
-        ApiWarehouse api = new ApiWarehouse();
-        api.setId(domain.businessUnitCode());
-        api.setLocation(domain.locationId());
-        api.setCapacity(domain.capacity());
-        api.setStock(domain.stock());
+    private com.warehouse.api.beans.Warehouse mapToApi(Warehouse domain) {
+        com.warehouse.api.beans.Warehouse api = new com.warehouse.api.beans.Warehouse();
+        api.setId(domain.businessUnitCode);
+        api.setLocation(domain.locationId);
+        api.setCapacity(domain.capacity);
+        api.setStock(domain.stock);
         return api;
     }
 }
-
