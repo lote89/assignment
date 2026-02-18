@@ -5,31 +5,64 @@ import jakarta.persistence.*;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "warehouse")  // Adjust table name if needed
-public class Warehouse extends PanacheEntityBase {  // Enables Panache CRUD
+@Table(name = "warehouse")
+public class Warehouse extends PanacheEntityBase {
 
+    @Id
+    @GeneratedValue
+    private Long id;
 
-  @Id @GeneratedValue  
-  public Long id;
-  @Column(unique = true, nullable = false)
-  public String businessUnitCode;
+    @Column(unique = true, nullable = false)
+    private String businessUnitCode;
 
-  @Column(nullable = false)
-  public String location;
+    @Column(nullable = false)
+    private String location;
 
-  @Column(nullable = false)
-  public Integer capacity;
+    @Column(nullable = false)
+    private Integer capacity;
 
-  @Column(nullable = false)
-  public Integer stock;
+    @Column(nullable = false)
+    private Integer stock;
 
-  @Column(nullable = false)
-  public ZonedDateTime creationAt;
+    @Column(nullable = false)
+    private ZonedDateTime creationAt;
 
-  public ZonedDateTime archivedAt;  // Null = active
+    private ZonedDateTime archivedAt; // Null = active
 
-  // Business method for active check (used in queries/mappers)
-  public boolean isActive() {
-    return archivedAt == null;
-  }
+    // --- Constructors ---
+    public Warehouse() {}
+
+    public Warehouse(Long id, String businessUnitCode, String location, Integer capacity, Integer stock, ZonedDateTime creationAt) {
+        this.id = id;
+        this.businessUnitCode = businessUnitCode;
+        this.location = location;
+        this.capacity = capacity;
+        this.stock = stock;
+        this.creationAt = creationAt;
+    }
+
+    // --- Getters ---
+    public Long id() { return id; }
+    public String businessUnitCode() { return businessUnitCode; }
+    public String locationId() { return location; }
+    public Integer capacity() { return capacity; }
+    public Integer stock() { return stock; }
+    public ZonedDateTime creationAt() { return creationAt; }
+    public ZonedDateTime archivedAt() { return archivedAt; }
+
+    // --- Business Methods ---
+    public boolean isActive() {
+        return archivedAt == null;
+    }
+
+    public void archive() {
+        this.archivedAt = ZonedDateTime.now();
+    }
+
+    public void updateFrom(Warehouse other) {
+        this.businessUnitCode = other.businessUnitCode;
+        this.location = other.location;
+        this.capacity = other.capacity;
+        this.stock = other.stock;
+    }
 }
