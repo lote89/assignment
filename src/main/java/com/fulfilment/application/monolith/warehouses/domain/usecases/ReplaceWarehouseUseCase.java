@@ -30,36 +30,36 @@ public class ReplaceWarehouseUseCase implements ReplaceWarehouseOperation {
     @Override
     public void replace(Warehouse newWarehouse) {
         // 1. Find existing warehouse
-        Warehouse oldWarehouse = warehouseStore.findByBusinessUnitCode(newWarehouse.businessUnitCode);
+        Warehouse oldWarehouse = warehouseStore.findByBusinessUnitCode(newWarehouse.getBusinessUnitCode());
         if (oldWarehouse == null) {
-            throw new WarehouseDomainException("Warehouse not found: " + newWarehouse.businessUnitCode);
+            throw new WarehouseDomainException("Warehouse not found: " + newWarehouse.getBusinessUnitCode());
         }
 
         // 2. Validate location exists
-        Location location = locationResolver.resolveByIdentifier(newWarehouse.location);
+        Location location = locationResolver.resolveByIdentifier(newWarehouse.getLocation());
 
         // 3. Validate capacity against location limit
         int maxCapacity = location.getMaxCapacity();
-        if (newWarehouse.capacity > maxCapacity) {
+        if (newWarehouse.getCapacity() > maxCapacity) {
             throw new WarehouseCapacityExceededException(
-                "Capacity " + newWarehouse.capacity +
+                "Capacity " + newWarehouse.getCapacity() +
                 " exceeds limit " + maxCapacity +
-                " for location " + newWarehouse.location
+                " for location " + newWarehouse.getLocation()
             );
         }
 
         // 4. Stock consistency checks
-        if (newWarehouse.capacity < oldWarehouse.stock) {
-            throw new WarehouseDomainException("Capacity cannot accommodate stock: " + newWarehouse.capacity);
+        if (newWarehouse.getCapacity() < oldWarehouse.getStock()) {
+            throw new WarehouseDomainException("Capacity cannot accommodate stock: " + newWarehouse.getCapacity());
         }
 
-        if (!newWarehouse.stock.equals(oldWarehouse.stock)) {
-            throw new WarehouseDomainException("Stock mismatch: " + newWarehouse.stock);
+        if (!newWarehouse.getStock().equals(oldWarehouse.getStock())) {
+            throw new WarehouseDomainException("Stock mismatch: " + newWarehouse.getStock());
         }
 
         // 5. Archive old, update with new
         archiveUseCase.archive(oldWarehouse);
-        newWarehouse.creationAt = ZonedDateTime.now();
+        newWarehouse.setCreationAt(ZonedDateTime.now());
         warehouseStore.update(newWarehouse);
     }
 }
