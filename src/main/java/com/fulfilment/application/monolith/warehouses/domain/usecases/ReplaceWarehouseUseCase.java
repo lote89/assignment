@@ -9,6 +9,7 @@ import com.fulfilment.application.monolith.warehouses.domain.ports.LocationResol
 import com.fulfilment.application.monolith.warehouses.domain.ports.ReplaceWarehouseOperation;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import jakarta.enterprise.context.ApplicationScoped;
+import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
 
 import java.time.ZonedDateTime;
 
