@@ -5,7 +5,7 @@ import com.fulfilment.application.monolith.warehouses.domain.models.Location;
 import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import com.warehouse.api.WarehouseResource;
-import com.warehouse.api.beans.Warehouse; // API bean
+import com.warehouse.api.beans.Warehouse as ApiWarehouse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -14,9 +14,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.time.ZonedDateTime;
 
 @ApplicationScoped
 public class WarehouseResourceImpl implements WarehouseResource {
@@ -31,7 +31,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Warehouse createANewWarehouseUnit(@Valid Warehouse apiWarehouse) {
+    public ApiWarehouse createANewWarehouseUnit(@Valid ApiWarehouse apiWarehouse) {
 
         String buCode = apiWarehouse.getId();
 
@@ -54,25 +54,22 @@ public class WarehouseResourceImpl implements WarehouseResource {
             throw new RuntimeException("Capacity cannot be lower than stock");
         }
 
-        // Create domain entity
-        com.fulfilment.application.monolith.warehouses.domain.models.Warehouse domainWarehouse =
-                new com.fulfilment.application.monolith.warehouses.domain.models.Warehouse(
-                        null,
-                        apiWarehouse.getId(),
-                        loc.identification(),
-                        apiWarehouse.getCapacity(),
-                        apiWarehouse.getStock(),
-                        ZonedDateTime.now()
-                );
+        Warehouse domainWarehouse = new Warehouse(
+                null,
+                apiWarehouse.getId(),
+                loc.identification(),
+                apiWarehouse.getCapacity(),
+                apiWarehouse.getStock(),
+                ZonedDateTime.now()
+        );
 
         repo.create(domainWarehouse);
-
         return mapToApi(domainWarehouse);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Warehouse> listAllWarehouseUnits() {
+    public List<ApiWarehouse> listAllWarehouseUnits() {
         return repo.findAllActive()
                 .stream()
                 .map(this::mapToApi)
@@ -82,10 +79,9 @@ public class WarehouseResourceImpl implements WarehouseResource {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Warehouse getAWarehouseUnitByID(@NotNull @PathParam("id") String id) {
-        com.fulfilment.application.monolith.warehouses.domain.models.Warehouse domain =
-                repo.findByIdOptional(Long.parseLong(id))
-                        .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+    public ApiWarehouse getAWarehouseUnitByID(@NotNull @PathParam("id") String id) {
+        Warehouse domain = repo.findByIdOptional(Long.parseLong(id))
+                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
         return mapToApi(domain);
     }
 
@@ -94,11 +90,10 @@ public class WarehouseResourceImpl implements WarehouseResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Transactional
-    public Warehouse replaceWarehouse(@PathParam("id") String id, @Valid Warehouse newApiWarehouse) {
+    public ApiWarehouse replaceWarehouse(@PathParam("id") String id, @Valid ApiWarehouse newApiWarehouse) {
 
-        com.fulfilment.application.monolith.warehouses.domain.models.Warehouse old =
-                repo.findByIdOptional(Long.parseLong(id))
-                        .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+        Warehouse old = repo.findByIdOptional(Long.parseLong(id))
+                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
 
         String newBu = newApiWarehouse.getId();
         if (!newBu.equals(old.businessUnitCode()) && repo.existsByBusinessUnitCode(newBu)) {
@@ -124,8 +119,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
             throw new RuntimeException("Stock must match previous warehouse");
         }
 
-        // Update domain entity
-        old.updateFrom(new com.fulfilment.application.monolith.warehouses.domain.models.Warehouse(
+        old.updateFrom(new Warehouse(
                 old.id(),
                 newBu,
                 loc.identification(),
@@ -142,16 +136,14 @@ public class WarehouseResourceImpl implements WarehouseResource {
     @Path("/{id}")
     @Transactional
     public void archiveAWarehouseUnitByID(@PathParam("id") String id) {
-        com.fulfilment.application.monolith.warehouses.domain.models.Warehouse domain =
-                repo.findByIdOptional(Long.parseLong(id))
-                        .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+        Warehouse domain = repo.findByIdOptional(Long.parseLong(id))
+                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
         domain.archive();
         repo.update(domain);
     }
 
-    // --- Mapping method ---
-    private Warehouse mapToApi(com.fulfilment.application.monolith.warehouses.domain.models.Warehouse domain) {
-        Warehouse api = new Warehouse();
+    private ApiWarehouse mapToApi(Warehouse domain) {
+        ApiWarehouse api = new ApiWarehouse();
         api.setId(domain.businessUnitCode());
         api.setLocation(domain.locationId());
         api.setCapacity(domain.capacity());
@@ -159,3 +151,4 @@ public class WarehouseResourceImpl implements WarehouseResource {
         return api;
     }
 }
+
