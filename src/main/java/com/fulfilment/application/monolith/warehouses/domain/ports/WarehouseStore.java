@@ -11,7 +11,7 @@ public interface WarehouseStore {
 
   void archive(Long id);
 
-  Warehouse findByBusinessUnitCode(String buCode);
+  DomainWarehouse findByBusinessUnitCode(String buCode);
   boolean existsByBusinessUnitCode(String code);
   long countActiveByLocation(String location);
   List<DomainWarehouse> findAllActive();
