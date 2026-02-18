@@ -10,59 +10,61 @@ public class Warehouse extends PanacheEntityBase {
 
     @Id
     @GeneratedValue
-    private Long id;
+    public Long id;
 
     @Column(unique = true, nullable = false)
-    private String businessUnitCode;
+    public String businessUnitCode;
 
     @Column(nullable = false)
-    private String location;
+    public String locationId; // was "location"
 
     @Column(nullable = false)
-    private Integer capacity;
+    public Integer capacity;
 
     @Column(nullable = false)
-    private Integer stock;
+    public Integer stock;
 
     @Column(nullable = false)
-    private ZonedDateTime creationAt;
+    public ZonedDateTime creationAt;
 
-    private ZonedDateTime archivedAt; // Null = active
+    public ZonedDateTime archivedAt; // null = active
 
-    // --- Constructors ---
-    public Warehouse() {}
+    public Warehouse() {} // default constructor
 
-    public Warehouse(Long id, String businessUnitCode, String location, Integer capacity, Integer stock, ZonedDateTime creationAt) {
+    // Constructor with all required fields
+    public Warehouse(Long id, String businessUnitCode, String locationId,
+                     Integer capacity, Integer stock, ZonedDateTime creationAt) {
         this.id = id;
         this.businessUnitCode = businessUnitCode;
-        this.location = location;
+        this.locationId = locationId;
         this.capacity = capacity;
         this.stock = stock;
         this.creationAt = creationAt;
     }
 
-    // --- Getters ---
-    public Long id() { return id; }
-    public String businessUnitCode() { return businessUnitCode; }
-    public String locationId() { return location; }
-    public Integer capacity() { return capacity; }
-    public Integer stock() { return stock; }
-    public ZonedDateTime creationAt() { return creationAt; }
-    public ZonedDateTime archivedAt() { return archivedAt; }
-
-    // --- Business Methods ---
     public boolean isActive() {
         return archivedAt == null;
     }
 
+    // Archive this warehouse
     public void archive() {
         this.archivedAt = ZonedDateTime.now();
     }
 
+    // Update fields from another warehouse instance
     public void updateFrom(Warehouse other) {
         this.businessUnitCode = other.businessUnitCode;
-        this.location = other.location;
+        this.locationId = other.locationId;
         this.capacity = other.capacity;
         this.stock = other.stock;
     }
+
+    // Optional getters if needed
+    public Long getId() { return id; }
+    public String getBusinessUnitCode() { return businessUnitCode; }
+    public String getLocationId() { return locationId; }
+    public Integer getCapacity() { return capacity; }
+    public Integer getStock() { return stock; }
+    public ZonedDateTime getCreationAt() { return creationAt; }
+    public ZonedDateTime getArchivedAt() { return archivedAt; }
 }
