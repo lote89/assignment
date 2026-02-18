@@ -5,7 +5,7 @@ import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStor
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions.WarehouseDomainException;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;  // FIX: ZonedDateTime not LocalDateTime
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,19 +16,19 @@ public class WarehouseRepository implements WarehouseStore {
     @Override
     @Transactional
     public void create(Warehouse warehouse) {
-        if (existsByBusinessUnitCode(warehouse.businessUnitCode())) {
-            throw new WarehouseDomainException("Warehouse not found");
+        if (existsByBusinessUnitCode(warehouse.getBusinessUnitCode())) {  
+            throw new WarehouseDomainException("Warehouse with this businessUnitCode already exists");
         }
         DbWarehouse db = new DbWarehouse();
         mapToDb(warehouse, db);
-        db.createdAt = LocalDateTime.now();
+        db.creationAt = ZonedDateTime.now(); 
         db.persist();
     }
 
     @Override
     @Transactional
     public void update(Warehouse warehouse) {
-        DbWarehouse db = findDbById(warehouse.id())
+        DbWarehouse db = findDbById(warehouse.getId())  
             .orElseThrow(() -> new IllegalStateException("Warehouse not found"));
         mapToDb(warehouse, db);
         db.persist();
@@ -40,7 +40,7 @@ public class WarehouseRepository implements WarehouseStore {
         DbWarehouse db = DbWarehouse.findById(id)
             .orElseThrow(() -> new IllegalStateException("Warehouse not found"));
         if (db.archivedAt == null) {
-            db.archivedAt = LocalDateTime.now();
+            db.archivedAt = ZonedDateTime.now();  
             db.persist();
         }
     }
@@ -63,10 +63,12 @@ public class WarehouseRepository implements WarehouseStore {
             .collect(Collectors.toList());
     }
 
-    public long countActiveByLocation(String locationId) {
-        return DbWarehouse.count("locationId = ?1 and archivedAt is null", locationId);
+    @Override  // ADD @Override
+    public long countActiveByLocation(String location) {  
+        return DbWarehouse.count("location = ?1 and archivedAt is null", location);
     }
 
+    @Override  // ADD @Override
     public boolean existsByBusinessUnitCode(String buCode) {
         return DbWarehouse.count("businessUnitCode = ?1 and archivedAt is null", buCode) > 0;
     }
@@ -76,19 +78,23 @@ public class WarehouseRepository implements WarehouseStore {
     }
 
     private void mapToDb(Warehouse source, DbWarehouse target) {
-        target.businessUnitCode = source.businessUnitCode();
-        target.locationId = source.locationId();
-        target.capacity = source.capacity();
-        target.stock = source.stock();
+        target.businessUnitCode = source.getBusinessUnitCode();  
+        target.location = source.getLocation();                  
+        target.capacity = source.getCapacity();                
+        target.stock = source.getStock();                        
+        target.creationAt = source.getCreationAt();              
+        target.archivedAt = source.getArchivedAt();
     }
 
     private Warehouse mapToDomain(DbWarehouse db) {
         return new Warehouse(
-            db.id, 
+            db.getId(),         
             db.businessUnitCode, 
-            db.locationId, 
+            db.location,        
             db.capacity, 
-            db.stock
+            db.stock,
+            db.creationAt,      
+            db.archivedAt
         );
     }
 }
