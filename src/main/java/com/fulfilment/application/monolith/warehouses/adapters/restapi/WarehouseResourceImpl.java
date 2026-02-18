@@ -1,159 +1,95 @@
 package com.fulfilment.application.monolith.warehouses.adapters.restapi;
 
-import com.fulfilment.application.monolith.location.LocationGateway;
-import com.fulfilment.application.monolith.warehouses.domain.models.Location;
 import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import com.warehouse.api.WarehouseResource;
-import jakarta.enterprise.context.ApplicationScoped;
+import com.warehouse.api.beans.Warehouse as ApiWarehouse;
+
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-
+import jakarta.ws.rs.core.Response;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ApplicationScoped
+@Path("/warehouses")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class WarehouseResourceImpl implements WarehouseResource {
 
     @Inject
     WarehouseStore repo;
 
-    @Inject
-    LocationGateway locationGateway;
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Transactional
-    public com.warehouse.api.beans.Warehouse createANewWarehouseUnit(
-            @Valid com.warehouse.api.beans.Warehouse apiWarehouse
-    ) {
-
-        String buCode = apiWarehouse.getId();
-
-        if (repo.existsByBusinessUnitCode(buCode)) {
-            throw new RuntimeException("Business unit code already exists");
-        }
-
-        Location loc = locationGateway.resolveByIdentifier(apiWarehouse.getLocation())
-                .orElseThrow(() -> new RuntimeException("Invalid location"));
-
-        if (repo.countActiveByLocation(loc.identification()) >= loc.maxNumberOfWarehouses()) {
-            throw new RuntimeException("Maximum warehouses reached for location");
-        }
-
-        if (apiWarehouse.getCapacity() > loc.maxCapacity()) {
-            throw new RuntimeException("Capacity exceeds location maximum");
-        }
-
-        if (apiWarehouse.getCapacity() < apiWarehouse.getStock()) {
-            throw new RuntimeException("Capacity cannot be lower than stock");
-        }
-
-        Warehouse domainWarehouse = new Warehouse(
-                null, // id is generated
-                apiWarehouse.getId(),
-                loc.identification(),
-                apiWarehouse.getCapacity(),
-                apiWarehouse.getStock(),
-                ZonedDateTime.now()
-        );
-
-        repo.create(domainWarehouse);
-
-        return mapToApi(domainWarehouse);
-    }
-
+    @Override
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<com.warehouse.api.beans.Warehouse> listAllWarehouseUnits() {
-        return repo.findAllActive()
-                .stream()
-                .map(this::mapToApi)
+    @Path("/")
+    public List<ApiWarehouse> listAllWarehousesUnits() {
+        return repo.listAll().stream()
+                .map(this::toApiWarehouse)
                 .collect(Collectors.toList());
     }
 
-    @GET
-    @Path("/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public com.warehouse.api.beans.Warehouse getAWarehouseUnitByID(@NotNull @PathParam("id") String id) {
-        Warehouse domain = repo.findByIdOptional(Long.parseLong(id))
-                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
-        return mapToApi(domain);
+    @Override
+    @POST
+    @Path("/")
+    public Response createANewWarehouseUnit(@Valid ApiWarehouse request) {
+        Warehouse warehouse = new Warehouse(
+                null,
+                request.getBusinessUnitCode(),
+                request.getLocation(),
+                request.getCapacity(),
+                request.getStock(),
+                ZonedDateTime.now()
+        );
+
+        repo.persist(warehouse);
+
+        return Response.status(Response.Status.CREATED)
+                .entity(toApiWarehouse(warehouse))
+                .build();
     }
 
+    @Override
     @PUT
     @Path("/{id}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Transactional
-    public com.warehouse.api.beans.Warehouse replaceWarehouse(
-            @PathParam("id") String id,
-            @Valid com.warehouse.api.beans.Warehouse newApiWarehouse
-    ) {
+    public Response replaceWarehouseUnit(@PathParam("id") Long id, @Valid ApiWarehouse request) {
+        Warehouse existing = repo.findByIdOptional(id)
+                .orElseThrow(() -> new NotFoundException("Warehouse not found: " + id));
 
-        Warehouse old = repo.findByIdOptional(Long.parseLong(id))
-                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+        existing.setBusinessUnitCode(request.getBusinessUnitCode());
+        existing.setLocation(request.getLocation());
+        existing.setCapacity(request.getCapacity());
+        existing.setStock(request.getStock());
 
-        String newBu = newApiWarehouse.getId();
-        if (!newBu.equals(old.businessUnitCode) && repo.existsByBusinessUnitCode(newBu)) {
-            throw new RuntimeException("Business unit code conflict");
-        }
+        repo.persist(existing);
 
-        Location loc = locationGateway.resolveByIdentifier(newApiWarehouse.getLocation())
-                .orElseThrow(() -> new RuntimeException("Invalid location"));
-
-        if (newApiWarehouse.getCapacity() > loc.maxCapacity()) {
-            throw new RuntimeException("Capacity exceeds location maximum");
-        }
-
-        if (newApiWarehouse.getCapacity() < newApiWarehouse.getStock()) {
-            throw new RuntimeException("Capacity cannot be lower than stock");
-        }
-
-        if (newApiWarehouse.getCapacity() < old.stock) {
-            throw new RuntimeException("New capacity cannot accommodate previous stock");
-        }
-
-        if (!newApiWarehouse.getStock().equals(old.stock)) {
-            throw new RuntimeException("Stock must match previous warehouse");
-        }
-
-        old.updateFrom(new Warehouse(
-                old.id,
-                newBu,
-                loc.identification(),
-                newApiWarehouse.getCapacity(),
-                newApiWarehouse.getStock(),
-                old.creationAt
-        ));
-
-        repo.update(old);
-
-        return mapToApi(old);
+        return Response.ok(toApiWarehouse(existing)).build();
     }
 
+    @Override
     @DELETE
     @Path("/{id}")
-    @Transactional
-    public void archiveAWarehouseUnitByID(@PathParam("id") String id) {
-        Warehouse domain = repo.findByIdOptional(Long.parseLong(id))
-                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
-        domain.archive();
-        repo.update(domain);
+    public Response archiveWarehouseUnit(@PathParam("id") Long id) {
+        Warehouse warehouse = repo.findByIdOptional(id)
+                .orElseThrow(() -> new NotFoundException("Warehouse not found: " + id));
+
+        warehouse.archive();
+        repo.persist(warehouse);
+
+        return Response.noContent().build();
     }
 
-    private com.warehouse.api.beans.Warehouse mapToApi(Warehouse domain) {
-        com.warehouse.api.beans.Warehouse api = new com.warehouse.api.beans.Warehouse();
-        api.setId(domain.businessUnitCode);
-        api.setLocation(domain.locationId);
-        api.setCapacity(domain.capacity);
-        api.setStock(domain.stock);
+    // Mapper: Domain -> API bean
+    private ApiWarehouse toApiWarehouse(Warehouse w) {
+        ApiWarehouse api = new ApiWarehouse();
+        api.setId(w.getId());
+        api.setBusinessUnitCode(w.getBusinessUnitCode());
+        api.setLocation(w.getLocation());
+        api.setCapacity(w.getCapacity());
+        api.setStock(w.getStock());
+        api.setCreationAt(w.getCreationAt());
         return api;
     }
 }
