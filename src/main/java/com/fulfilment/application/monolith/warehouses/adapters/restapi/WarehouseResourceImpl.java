@@ -3,7 +3,7 @@ package com.fulfilment.application.monolith.warehouses.adapters.restapi;
 import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import com.warehouse.api.WarehouseResource;
-import com.warehouse.api.beans.Warehouse as ApiWarehouse;
+import com.warehouse.api.beans.Warehouse; // Import normally
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -25,7 +25,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
     @Override
     @GET
     @Path("/")
-    public List<ApiWarehouse> listAllWarehousesUnits() {
+    public List<Warehouse> listAllWarehousesUnits() {
         return repo.listAll().stream()
                 .map(this::toApiWarehouse)
                 .collect(Collectors.toList());
@@ -34,15 +34,16 @@ public class WarehouseResourceImpl implements WarehouseResource {
     @Override
     @POST
     @Path("/")
-    public Response createANewWarehouseUnit(@Valid ApiWarehouse request) {
-        Warehouse warehouse = new Warehouse(
-                null,
-                request.getBusinessUnitCode(),
-                request.getLocation(),
-                request.getCapacity(),
-                request.getStock(),
-                ZonedDateTime.now()
-        );
+    public Response createANewWarehouseUnit(@Valid Warehouse request) {
+        com.fulfilment.application.monolith.warehouses.domain.models.Warehouse warehouse =
+                new com.fulfilment.application.monolith.warehouses.domain.models.Warehouse(
+                        null,
+                        request.getBusinessUnitCode(),
+                        request.getLocation(),
+                        request.getCapacity(),
+                        request.getStock(),
+                        ZonedDateTime.now()
+                );
 
         repo.persist(warehouse);
 
@@ -54,9 +55,10 @@ public class WarehouseResourceImpl implements WarehouseResource {
     @Override
     @PUT
     @Path("/{id}")
-    public Response replaceWarehouseUnit(@PathParam("id") Long id, @Valid ApiWarehouse request) {
-        Warehouse existing = repo.findByIdOptional(id)
-                .orElseThrow(() -> new NotFoundException("Warehouse not found: " + id));
+    public Response replaceWarehouseUnit(@PathParam("id") Long id, @Valid Warehouse request) {
+        com.fulfilment.application.monolith.warehouses.domain.models.Warehouse existing =
+                repo.findByIdOptional(id)
+                        .orElseThrow(() -> new NotFoundException("Warehouse not found: " + id));
 
         existing.setBusinessUnitCode(request.getBusinessUnitCode());
         existing.setLocation(request.getLocation());
@@ -72,8 +74,9 @@ public class WarehouseResourceImpl implements WarehouseResource {
     @DELETE
     @Path("/{id}")
     public Response archiveWarehouseUnit(@PathParam("id") Long id) {
-        Warehouse warehouse = repo.findByIdOptional(id)
-                .orElseThrow(() -> new NotFoundException("Warehouse not found: " + id));
+        com.fulfilment.application.monolith.warehouses.domain.models.Warehouse warehouse =
+                repo.findByIdOptional(id)
+                        .orElseThrow(() -> new NotFoundException("Warehouse not found: " + id));
 
         warehouse.archive();
         repo.persist(warehouse);
@@ -82,8 +85,8 @@ public class WarehouseResourceImpl implements WarehouseResource {
     }
 
     // Mapper: Domain -> API bean
-    private ApiWarehouse toApiWarehouse(Warehouse w) {
-        ApiWarehouse api = new ApiWarehouse();
+    private Warehouse toApiWarehouse(com.fulfilment.application.monolith.warehouses.domain.models.Warehouse w) {
+        Warehouse api = new Warehouse();
         api.setId(w.getId());
         api.setBusinessUnitCode(w.getBusinessUnitCode());
         api.setLocation(w.getLocation());
