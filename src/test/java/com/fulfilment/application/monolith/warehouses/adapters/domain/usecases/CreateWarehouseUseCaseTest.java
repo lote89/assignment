@@ -4,7 +4,7 @@ import com.fulfilment.application.monolith.warehouses.domain.exceptions.Warehous
 import com.fulfilment.application.monolith.warehouses.domain.exceptions.WarehouseDomainException;
 import com.fulfilment.application.monolith.warehouses.domain.exceptions.WarehouseLimitExceededException;
 import com.fulfilment.application.monolith.warehouses.domain.models.Location;
-import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
+import com.fulfilment.application.monolith.warehouses.domain.models.DomainWarehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.LocationResolver;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +28,7 @@ class CreateWarehouseUseCaseTest {
 
     @Test
     void shouldCreateWarehouseWhenValid() {
-        Warehouse warehouse = new Warehouse("BU-1", "AMSTERDAM-001", 50, 10);
+        DomainWarehouse warehouse = new DomainWarehouse("BU-1", "AMSTERDAM-001", 50, 10);
 
         Location location = new Location("AMSTERDAM-001", 5, 100);
 
@@ -44,7 +44,7 @@ class CreateWarehouseUseCaseTest {
 
     @Test
     void shouldFailWhenBusinessUnitExists() {
-        Warehouse warehouse = new Warehouse("BU-1", "AMSTERDAM-001", 50, 10);
+        DomainWarehouse warehouse = new DomainWarehouse("BU-1", "AMSTERDAM-001", 50, 10);
 
         when(warehouseStore.existsByBusinessUnitCode("BU-1")).thenReturn(true);
 
@@ -54,7 +54,7 @@ class CreateWarehouseUseCaseTest {
 
     @Test
     void shouldFailWhenMaxWarehousesReached() {
-        Warehouse warehouse = new Warehouse("BU-1", "AMSTERDAM-001", 50, 10);
+        DomainWarehouse warehouse = new DomainWarehouse("BU-1", "AMSTERDAM-001", 50, 10);
         Location location = new Location("AMSTERDAM-001", 2, 100);
 
         when(warehouseStore.existsByBusinessUnitCode("BU-1")).thenReturn(false);
@@ -66,7 +66,7 @@ class CreateWarehouseUseCaseTest {
 
     @Test
     void shouldFailWhenCapacityExceeded() {
-        Warehouse warehouse = new Warehouse("BU-1", "AMSTERDAM-001", 150, 10);
+        DomainWarehouse warehouse = new DomainWarehouse("BU-1", "AMSTERDAM-001", 150, 10);
         Location location = new Location("AMSTERDAM-001", 5, 100);
 
         when(warehouseStore.existsByBusinessUnitCode("BU-1")).thenReturn(false);
