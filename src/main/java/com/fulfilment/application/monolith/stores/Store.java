@@ -22,4 +22,5 @@ public class Store extends PanacheEntity {
   public Long id() {
     return id; 
   }
+  
 }
