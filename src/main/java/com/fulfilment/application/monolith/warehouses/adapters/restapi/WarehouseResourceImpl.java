@@ -8,10 +8,9 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;  // ADD THIS IMPORT
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Path("/warehouses")
@@ -30,14 +29,14 @@ public class WarehouseResourceImpl implements WarehouseResource {
                 .collect(Collectors.toList());
     }
 
-    // FIX: Match exact interface signature - NO Response wrapper
+    
     @Override
     @POST
     @Path("/")
     public com.warehouse.api.beans.Warehouse createANewWarehouseUnit(@Valid com.warehouse.api.beans.Warehouse request) {
         Warehouse domainWarehouse = new Warehouse(
                 null,
-                request.getBusinessUnitCode(),  // API bean method exists
+                request.getBuCode(),  
                 request.getLocation(),
                 request.getCapacity(),
                 request.getStock(),
@@ -58,8 +57,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
         }
         Warehouse existing = existingOpt.get();
 
-        // FIX: Use setters (they exist)
-        existing.setBusinessUnitCode(request.getBusinessUnitCode());
+        existing.setBusinessUnitCode(request.getBuCode());  
         existing.setLocation(request.getLocation());
         existing.setCapacity(request.getCapacity());
         existing.setStock(request.getStock());
@@ -68,12 +66,12 @@ public class WarehouseResourceImpl implements WarehouseResource {
         return Response.ok(toApiWarehouse(existing)).build();
     }
 
-    // ADD: Missing method from interface
+    
     @Override
     @DELETE
     @Path("/{id}")
-    public Response archiveAWarehouseUnitByID(String id) {  // String id, not Long
-        Long longId = Long.valueOf(id);  // FIX: Convert String -> Long
+    public void archiveAWarehouseUnitByID(String id) {  
+        Long longId = Long.parseLong(id);
         Optional<Warehouse> warehouseOpt = repo.findById(longId);
         if (warehouseOpt.isEmpty()) {
             throw new NotFoundException("Warehouse not found: " + id);
@@ -81,17 +79,16 @@ public class WarehouseResourceImpl implements WarehouseResource {
         Warehouse warehouse = warehouseOpt.get();
         warehouse.archive();
         repo.update(warehouse);
-        return Response.noContent().build();
+        
     }
 
     private com.warehouse.api.beans.Warehouse toApiWarehouse(Warehouse w) {
         com.warehouse.api.beans.Warehouse api = new com.warehouse.api.beans.Warehouse();
-        api.setId(w.getId());
-        api.setBusinessUnitCode(w.getBusinessUnitCode());
+        api.setId(w.getId().toString());  
+        api.setBuCode(w.getBusinessUnitCode());  
         api.setLocation(w.getLocation());
         api.setCapacity(w.getCapacity());
         api.setStock(w.getStock());
-        api.setCreationAt(w.getCreationAt());
         return api;
     }
 }
