@@ -46,18 +46,18 @@ public class WarehouseRepository implements WarehouseStore {
     }
 
     @Override
-    public Optional<Warehouse> findById(Long id) {
+    public Optional<DomainWarehouse> findById(Long id) {
         return findDbById(id).map(this::mapToDomain);
     }
 
     @Override
-    public Warehouse findByBusinessUnitCode(String buCode) {
+    public DomainWarehouse findByBusinessUnitCode(String buCode) {
         DbWarehouse db = DbWarehouse.find("businessUnitCode = ?1 and archivedAt is null", buCode).firstResult();
         return db != null ? mapToDomain(db) : null;
     }
 
     @Override
-    public List<Warehouse> findAllActive() {
+    public List<DomainWarehouse> findAllActive() {
         return DbWarehouse.<DbWarehouse>find("archivedAt is null").list().stream()
             .map(this::mapToDomain)
             .collect(Collectors.toList());
