@@ -26,20 +26,20 @@ public class CreateWarehouseUseCase implements CreateWarehouseOperation {
     @Override
     public void create(Warehouse warehouse) {
         // 1. Business Unit uniqueness check
-        if (warehouseStore.existsByBusinessUnitCode(warehouse.businessUnitCode)) {
-            throw new WarehouseDomainException("Business unit code already exists: " + warehouse.businessUnitCode);
+        if (warehouseStore.existsByBusinessUnitCode(warehouse.getBusinessUnitCode())) {
+            throw new WarehouseDomainException("Business unit code already exists: " + warehouse.getBusinessUnitCode());
         }
 
         // 2. Validate location exists (no hardcoding, uses gateway)
-        Location location = locationResolver.resolveByIdentifier(warehouse.location);
+        Location location = locationResolver.resolveByIdentifier(warehouse.getLocation());
 
         // 3. Validate max warehouses for this location
-        long activeCount = warehouseStore.countActiveByLocation(warehouse.location);
+        long activeCount = warehouseStore.countActiveByLocation(warehouse.getLocation());
         int maxWarehouses = location.getMaxNumberOfWarehouses();
 
         if (activeCount >= maxWarehouses) {
             throw new WarehouseLimitExceededException(
-                "Max warehouses reached for location " + warehouse.location +
+                "Max warehouses reached for location " + warehouse.getLocation() +
                 " (limit=" + maxWarehouses + ")"
             );
         }
@@ -47,21 +47,21 @@ public class CreateWarehouseUseCase implements CreateWarehouseOperation {
         // 4. Validate capacity for this location
         int maxCapacity = location.getMaxCapacity();
 
-        if (warehouse.capacity > maxCapacity) {
+        if (warehouse.getCapacity() > maxCapacity) {
             throw new WarehouseCapacityExceededException(
-                "Capacity " + warehouse.capacity +
+                "Capacity " + warehouse.getCapacity() +
                 " exceeds limit " + maxCapacity +
-                " for location " + warehouse.location
+                " for location " + warehouse.getLocation()
             );
         }
 
         // 5. Stock vs capacity check
-        if (warehouse.stock > warehouse.capacity) {
+        if (warehouse.getStock() > warehouse.getCapacity()) {
             throw new WarehouseDomainException("Stock exceeds capacity");
         }
 
         // 6. Create warehouse
-        warehouse.creationAt = ZonedDateTime.now();
+        warehouse.setCreationAt(ZonedDateTime.now());
         warehouseStore.create(warehouse);
     }
 }
