@@ -1,6 +1,6 @@
 package com.fulfilment.application.monolith.warehouses.adapters.database;
 
-import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
+import com.fulfilment.application.monolith.warehouses.domain.models.DomainWarehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -15,7 +15,7 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     @Transactional
-    public void create(Warehouse warehouse) {
+    public void create(DomainWarehouse warehouse) {
         if (existsByBusinessUnitCode(warehouse.getBusinessUnitCode())) {
             throw new WarehouseDomainException("Warehouse with this businessUnitCode already exists");
         }
@@ -27,7 +27,7 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     @Transactional
-    public void update(com.fulfilment.application.monolith.warehouses.domain.models.Warehouse warehouse) {
+    public void update(DomainWarehouse warehouse) {
     DbWarehouse db = findDbById(warehouse.getId())
         .orElseThrow(() -> new IllegalStateException("Warehouse not found"));
     mapToDb(warehouse, db);
@@ -77,7 +77,7 @@ public class WarehouseRepository implements WarehouseStore {
         return DbWarehouse.find("id = ?1 and archivedAt is null", id).firstResultOptional();
     }
 
-    private void mapToDb(Warehouse source, DbWarehouse target) {
+    private void mapToDb(DomainWarehouse source, DbWarehouse target) {
         target.businessUnitCode = source.getBusinessUnitCode();
         target.location = source.getLocation();
         target.capacity = source.getCapacity();
@@ -86,8 +86,8 @@ public class WarehouseRepository implements WarehouseStore {
         target.archivedAt = source.getArchivedAt();
     }
 
-    private Warehouse mapToDomain(DbWarehouse db) {
-        return new Warehouse(
+    private DomainWarehouse mapToDomain(DbWarehouse db) {
+        return new DomainWarehouse(
             db.id,
             db.businessUnitCode,
             db.location,
