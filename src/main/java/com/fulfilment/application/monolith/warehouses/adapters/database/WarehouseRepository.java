@@ -25,14 +25,14 @@ public class WarehouseRepository implements WarehouseStore {
         db.persist();
     }
 
-    @Override
+   /* @Override
     @Transactional
     public void update(DomainWarehouse warehouse) {
     DbWarehouse db = .findByCode(warehouseCode)
         .orElseThrow(() -> new IllegalStateException("Warehouse not found"));
     mapToDb(warehouse, db);
     db.persist();
-    }
+    }*/
     
     @Override
     @Transactional
