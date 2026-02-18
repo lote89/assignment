@@ -41,15 +41,15 @@ public class DbWarehouse extends PanacheEntity {
     }
 
     
-    public Warehouse toDomain() {
-        return new Warehouse(
-            db.getId(),  
-            businessUnitCode,
-            location,
-            capacity,
-            stock,
-            creationAt,
-            archivedAt
-        );
-    }
+  public Warehouse toDomain() {
+    return new Warehouse(
+        this.getId(),  
+        businessUnitCode,
+        location,
+        capacity,
+        stock,
+        creationAt,
+        archivedAt
+    );
+}
 }
