@@ -4,7 +4,7 @@ import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions
 import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions.WarehouseDomainException;
 import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions.WarehouseLimitExceededException;
 import com.fulfilment.application.monolith.warehouses.domain.models.Location;
-import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
+import com.fulfilment.application.monolith.warehouses.domain.models.DomainWarehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.CreateWarehouseOperation;
 import com.fulfilment.application.monolith.warehouses.domain.ports.LocationResolver;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
@@ -24,7 +24,7 @@ public class CreateWarehouseUseCase implements CreateWarehouseOperation {
     }
 
     @Override
-    public void create(Warehouse warehouse) {
+    public void create(DomainWarehouse warehouse) {
         // 1. Business Unit uniqueness check
         if (warehouseStore.existsByBusinessUnitCode(warehouse.getBusinessUnitCode())) {
             throw new WarehouseDomainException("Business unit code already exists: " + warehouse.getBusinessUnitCode());
