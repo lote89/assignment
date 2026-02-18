@@ -7,14 +7,46 @@ import java.time.ZonedDateTime;
 @Entity
 @Table(name = "warehouse")
 @Cacheable
-public class DbWarehouse extends PanacheEntity {  // ADD THIS EXTENDS
+public class DbWarehouse extends PanacheEntity {
 
-    public String businessUnitCode;
-    public String locationId;  // CHANGE: was "location"
+    @Column(unique = true, nullable = false)
+    public String businessUnitCode;  
+
+    @Column(nullable = false)
+    public String location;  
+
+    @Column(nullable = false)
     public Integer capacity;
+    @Column(nullable = false)
     public Integer stock;
-    public ZonedDateTime createdAt;  // FIX: was "creationAt"
+    @Column(nullable = false)
+    public ZonedDateTime creationAt;  
+
     public ZonedDateTime archivedAt;
 
     public DbWarehouse() {}
+
+    
+    public static DbWarehouse fromDomain(Warehouse source) {
+        DbWarehouse db = new DbWarehouse();
+        db.businessUnitCode = source.getBusinessUnitCode();
+        db.location = source.getLocation();
+        db.capacity = source.getCapacity();
+        db.stock = source.getStock();
+        db.creationAt = source.getCreationAt();
+        db.archivedAt = source.getArchivedAt();
+        return db;
+    }
+
+    public Warehouse toDomain() {
+        return new Warehouse(
+            getId(),
+            businessUnitCode,
+            location,
+            capacity,
+            stock,
+            creationAt,
+            archivedAt
+        );
+    }
 }
