@@ -41,15 +41,14 @@ public class DbWarehouse extends PanacheEntity {
     }
 
     
-  public DomainWarehouse toDomain() {
-    return new DomainWarehouse(
-        id,  
-        businessUnitCode,
-        location,
-        capacity,
-        stock,
-        creationAt,
-        archivedAt
-    );
-}
+ DomainWarehouse dw = new DomainWarehouse();
+dw.setId(id);
+dw.setCode(code);
+dw.setName(name);
+dw.setStreetNumber(streetNumber);
+dw.setPostalCode(postalCode);
+dw.setCity(city);
+dw.setCreationAt(creationAt);
+dw.setArchivedAt(archivedAt);
+return dw;
 }
