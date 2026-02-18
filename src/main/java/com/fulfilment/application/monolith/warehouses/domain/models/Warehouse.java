@@ -55,4 +55,5 @@ public class Warehouse {
         this.capacity = other.getCapacity();
         this.stock = other.getStock();
     }
+    
 }
