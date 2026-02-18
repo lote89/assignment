@@ -1,4 +1,4 @@
-package com.warehouse.api.beans;
+package com.fulfilment.application.monolith.warehouses.domain.models;
 
 import java.time.ZonedDateTime;
 
