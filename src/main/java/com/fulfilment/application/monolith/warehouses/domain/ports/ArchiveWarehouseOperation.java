@@ -1,7 +1,7 @@
 package com.fulfilment.application.monolith.warehouses.domain.ports;
 
-import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
+import com.fulfilment.application.monolith.warehouses.domain.models.DomainWarehouse;
 
 public interface ArchiveWarehouseOperation {
-  void archive(Warehouse warehouse);
+  void archive(DomainWarehouse warehouse);
 }
