@@ -3,7 +3,7 @@ package com.fulfilment.application.monolith.warehouses.adapters.restapi;
 import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import com.warehouse.api.WarehouseResource;
-import com.warehouse.api.beans.Warehouse;  // Import fixed
+import com.warehouse.api.beans.Warehouse;  
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
