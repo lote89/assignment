@@ -38,8 +38,10 @@ public class WarehouseRepository implements WarehouseStore {
     @Override
     @Transactional
     public void archive(Long id) {
-        DbWarehouse db = DbWarehouse.findById(id)
-            .orElseThrow(() -> new IllegalStateException("Warehouse not found"));
+        DbWarehouse db = findDbById(warehouse.getId()).orElse(null);
+        if (db == null) {
+            throw new IllegalStateException("Warehouse not found");
+         }
         if (db.archivedAt == null) {
             db.archivedAt = ZonedDateTime.now();  
             db.persist();
