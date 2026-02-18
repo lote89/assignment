@@ -61,7 +61,7 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     public List<Warehouse> findAllActive() {
-        return DbWarehouse.find("archivedAt is null").list().stream()
+        return DbWarehouse.<DbWarehouse>find("archivedAt is null").list().stream()
             .map(this::mapToDomain)
             .collect(Collectors.toList());
     }
