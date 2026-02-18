@@ -28,13 +28,12 @@ public class WarehouseRepository implements WarehouseStore {
     @Override
     @Transactional
     public void update(Warehouse warehouse) {
-        Optional<DbWarehouse> opt = findDbById(warehouse.getId());
-        // **FIXED: Line 44 - Use .orElseThrow() on Optional, not PanacheEntityBase**
-        DbWarehouse db = opt.orElseThrow(() -> new IllegalStateException("Warehouse not found"));
-        
-        mapToDb(warehouse, db);
-        db.persist();
-    }
+    DbWarehouse db = findDbById(warehouse.getId())
+        .orElseThrow(() -> new IllegalStateException("Warehouse not found"));  
+    
+    mapToDb(warehouse, db);
+    db.persist();
+}
 
     @Override
     @Transactional
