@@ -2,7 +2,7 @@ package com.warehouse.api.beans;
 
 import java.time.ZonedDateTime;
 
-public class Warehouse {
+public class DomainWarehouse {
     private String id;  
     private String businessUnitCode;
     private String location;
