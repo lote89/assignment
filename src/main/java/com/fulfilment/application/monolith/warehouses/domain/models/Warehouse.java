@@ -8,63 +8,68 @@ import java.time.ZonedDateTime;
 @Table(name = "warehouse")
 public class Warehouse extends PanacheEntityBase {
 
-    @Id
-    @GeneratedValue
-    public Long id;
+    @Id @GeneratedValue
+    private Long id;
 
     @Column(unique = true, nullable = false)
-    public String businessUnitCode;
+    private String businessUnitCode;
 
     @Column(nullable = false)
-    public String locationId; // was "location"
+    private String location;
 
     @Column(nullable = false)
-    public Integer capacity;
+    private Integer capacity;
 
     @Column(nullable = false)
-    public Integer stock;
+    private Integer stock;
 
     @Column(nullable = false)
-    public ZonedDateTime creationAt;
+    private ZonedDateTime creationAt;
 
-    public ZonedDateTime archivedAt; // null = active
+    private ZonedDateTime archivedAt;
 
-    public Warehouse() {} // default constructor
-
-    // Constructor with all required fields
-    public Warehouse(Long id, String businessUnitCode, String locationId,
-                     Integer capacity, Integer stock, ZonedDateTime creationAt) {
+    // Constructor
+    public Warehouse() {}
+    
+    public Warehouse(Long id, String businessUnitCode, String location, Integer capacity, Integer stock, ZonedDateTime creationAt) {
         this.id = id;
         this.businessUnitCode = businessUnitCode;
-        this.locationId = locationId;
+        this.location = location;
         this.capacity = capacity;
         this.stock = stock;
         this.creationAt = creationAt;
     }
 
-    public boolean isActive() {
-        return archivedAt == null;
-    }
+    // Getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    // Archive this warehouse
-    public void archive() {
-        this.archivedAt = ZonedDateTime.now();
-    }
+    public String getBusinessUnitCode() { return businessUnitCode; }
+    public void setBusinessUnitCode(String businessUnitCode) { this.businessUnitCode = businessUnitCode; }
 
-    // Update fields from another warehouse instance
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public Integer getCapacity() { return capacity; }
+    public void setCapacity(Integer capacity) { this.capacity = capacity; }
+
+    public Integer getStock() { return stock; }
+    public void setStock(Integer stock) { this.stock = stock; }
+
+    public ZonedDateTime getCreationAt() { return creationAt; }
+    public void setCreationAt(ZonedDateTime creationAt) { this.creationAt = creationAt; }
+
+    public ZonedDateTime getArchivedAt() { return archivedAt; }
+    public void setArchivedAt(ZonedDateTime archivedAt) { this.archivedAt = archivedAt; }
+
+    public boolean isActive() { return archivedAt == null; }
+
+    public void archive() { this.archivedAt = ZonedDateTime.now(); }
+
     public void updateFrom(Warehouse other) {
         this.businessUnitCode = other.businessUnitCode;
-        this.locationId = other.locationId;
+        this.location = other.location;
         this.capacity = other.capacity;
         this.stock = other.stock;
     }
-
-    // Optional getters if needed
-    public Long getId() { return id; }
-    public String getBusinessUnitCode() { return businessUnitCode; }
-    public String getLocationId() { return locationId; }
-    public Integer getCapacity() { return capacity; }
-    public Integer getStock() { return stock; }
-    public ZonedDateTime getCreationAt() { return creationAt; }
-    public ZonedDateTime getArchivedAt() { return archivedAt; }
 }
