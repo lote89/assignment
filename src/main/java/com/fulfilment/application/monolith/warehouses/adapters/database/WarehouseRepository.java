@@ -25,18 +25,17 @@ public class WarehouseRepository implements WarehouseStore {
         db.persist();
     }
 
-    @Override
-    @Transactional
-    public void update(Warehouse warehouse) {
-        
+   @Override
+   @Transactional
+   public void update(Warehouse warehouse) {
         Optional<DbWarehouse> opt = findDbById(warehouse.getId());
-        DbWarehouse db = opt.orElse(null);
-        if (db == null) {
-            throw new IllegalStateException("Warehouse not found");
-        }
-        mapToDb(warehouse, db);
-        db.persist();
+        DbWarehouse db = opt.orElse(null);  
+    if (db == null) {
+        throw new IllegalStateException("Warehouse not found");
     }
+    mapToDb(warehouse, db);
+    db.persist();
+   }
 
     @Override
     @Transactional
