@@ -34,7 +34,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
     public com.warehouse.api.beans.Warehouse getAWarehouseUnitByID(@PathParam("id") String id) {
         try {
             Long longId = Long.parseLong(id);
-            Optional<com.fulfilment.application.monolith.warehouses.domain.models.Warehouse> warehouseOpt = repo.findById(longId);
+            Optional<DomainWarehouse> warehouseOpt = repo.findById(longId);
             return warehouseOpt.map(this::toApiWarehouse).orElse(null);
         } catch (NumberFormatException e) {
             return null;
@@ -60,7 +60,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
     public com.warehouse.api.beans.Warehouse replaceWarehouseUnit(@PathParam("id") String id, @Valid com.warehouse.api.beans.Warehouse request) {
         try {
             Long longId = Long.parseLong(id);
-            Optional<com.fulfilment.application.monolith.warehouses.domain.models.Warehouse> existingOpt = repo.findById(longId);
+            Optional<DomainWarehouse> existingOpt = repo.findById(longId);
             if (existingOpt.isEmpty()) {
                 throw new NotFoundException("Warehouse not found: " + id);
             }
