@@ -4,14 +4,16 @@ import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.*;
 import java.time.ZonedDateTime;
 
+import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;  
+
 @Entity
 @Table(name = "warehouse")
 @Cacheable
 public class DbWarehouse extends PanacheEntity {
 
     @Column(unique = true, nullable = false)
-    public String businessUnitCode;  
-
+    public String businessUnitCode;
+    
     @Column(nullable = false)
     public String location;  
 
@@ -19,6 +21,7 @@ public class DbWarehouse extends PanacheEntity {
     public Integer capacity;
     @Column(nullable = false)
     public Integer stock;
+    
     @Column(nullable = false)
     public ZonedDateTime creationAt;  
 
@@ -26,7 +29,6 @@ public class DbWarehouse extends PanacheEntity {
 
     public DbWarehouse() {}
 
-    
     public static DbWarehouse fromDomain(Warehouse source) {
         DbWarehouse db = new DbWarehouse();
         db.businessUnitCode = source.getBusinessUnitCode();
@@ -38,9 +40,10 @@ public class DbWarehouse extends PanacheEntity {
         return db;
     }
 
+    
     public Warehouse toDomain() {
         return new Warehouse(
-            getId(),
+            this.getId(),  
             businessUnitCode,
             location,
             capacity,
