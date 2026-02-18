@@ -25,13 +25,13 @@ public class WarehouseRepository implements WarehouseStore {
         db.persist();
     }
 
-     @Override
-     @Transactional
-     public void update(Warehouse warehouse) {
-        DbWarehouse db = findDbById(warehouse.getId())
-           .orElseThrow(() -> new IllegalStateException("Warehouse not found"));
-        mapToDb(warehouse, db);
-        db.persist();
+    @Override
+    @Transactional
+    public void update(com.fulfilment.application.monolith.warehouses.domain.models.Warehouse warehouse) {
+    DbWarehouse db = findDbById(warehouse.getId())
+        .orElseThrow(() -> new IllegalStateException("Warehouse not found"));
+    mapToDb(warehouse, db);
+    db.persist();
     }
     
     @Override
