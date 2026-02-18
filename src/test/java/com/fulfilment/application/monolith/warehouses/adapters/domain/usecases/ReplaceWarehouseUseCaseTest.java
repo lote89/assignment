@@ -3,7 +3,7 @@ package com.fulfilment.application.monolith.warehouses.domain.usecases;
 import com.fulfilment.application.monolith.warehouses.domain.exceptions.WarehouseCapacityExceededException;
 import com.fulfilment.application.monolith.warehouses.domain.exceptions.WarehouseDomainException;
 import com.fulfilment.application.monolith.warehouses.domain.models.Location;
-import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
+import com.fulfilment.application.monolith.warehouses.domain.models.DomainWarehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.LocationResolver;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,8 +29,8 @@ class ReplaceWarehouseUseCaseTest {
 
     @Test
     void shouldReplaceWarehouseWhenValid() {
-        Warehouse oldWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 50, 10);
-        Warehouse newWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 60, 10);
+        DomainWarehouse oldWarehouse = new DomainWarehouse("BU-1", "AMSTERDAM-001", 50, 10);
+        DomainWarehouse newWarehouse = new DomainWarehouse("BU-1", "AMSTERDAM-001", 60, 10);
         Location location = new Location("AMSTERDAM-001", 5, 100);
 
         when(warehouseStore.findByBusinessUnitCode("BU-1")).thenReturn(oldWarehouse);
@@ -45,7 +45,7 @@ class ReplaceWarehouseUseCaseTest {
 
     @Test
     void shouldFailWhenWarehouseNotFound() {
-        Warehouse newWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 60, 10);
+        DomainWarehouse newWarehouse = new DomainWarehouse("BU-1", "AMSTERDAM-001", 60, 10);
 
         when(warehouseStore.findByBusinessUnitCode("BU-1")).thenReturn(null);
 
@@ -54,8 +54,8 @@ class ReplaceWarehouseUseCaseTest {
 
     @Test
     void shouldFailWhenCapacityExceededForLocation() {
-        Warehouse oldWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 50, 10);
-        Warehouse newWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 150, 10);
+        DomainWarehouse oldWarehouse = new DomainWarehouse("BU-1", "AMSTERDAM-001", 50, 10);
+        DomainWarehouse newWarehouse = new DomainWarehouse("BU-1", "AMSTERDAM-001", 150, 10);
         Location location = new Location("AMSTERDAM-001", 5, 100);
 
         when(warehouseStore.findByBusinessUnitCode("BU-1")).thenReturn(oldWarehouse);
@@ -66,8 +66,8 @@ class ReplaceWarehouseUseCaseTest {
 
     @Test
     void shouldFailWhenStockMismatch() {
-        Warehouse oldWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 50, 10);
-        Warehouse newWarehouse = new Warehouse("BU-1", "AMSTERDAM-001", 60, 5);
+        DomainWarehouse oldWarehouse = new DomainWarehouse("BU-1", "AMSTERDAM-001", 50, 10);
+        DomainWarehouse newWarehouse = new DomainWarehouse("BU-1", "AMSTERDAM-001", 60, 5);
         Location location = new Location("AMSTERDAM-001", 5, 100);
 
         when(warehouseStore.findByBusinessUnitCode("BU-1")).thenReturn(oldWarehouse);
