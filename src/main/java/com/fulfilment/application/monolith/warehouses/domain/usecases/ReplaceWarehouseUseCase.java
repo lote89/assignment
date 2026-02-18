@@ -4,7 +4,7 @@ import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions
 import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions.WarehouseDomainException;
 import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions.WarehouseLimitExceededException;
 import com.fulfilment.application.monolith.warehouses.domain.models.Location;
-import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
+import com.fulfilment.application.monolith.warehouses.domain.models.DomainWarehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.LocationResolver;
 import com.fulfilment.application.monolith.warehouses.domain.ports.ReplaceWarehouseOperation;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
@@ -28,7 +28,7 @@ public class ReplaceWarehouseUseCase implements ReplaceWarehouseOperation {
     }
 
     @Override
-    public void replace(Warehouse newWarehouse) {
+    public void replace(DomainWarehouse newWarehouse) {
         // 1. Find existing warehouse
         Warehouse oldWarehouse = warehouseStore.findByBusinessUnitCode(newWarehouse.getBusinessUnitCode());
         if (oldWarehouse == null) {
