@@ -29,14 +29,29 @@ public class WarehouseResourceImpl implements WarehouseResource {
                 .collect(Collectors.toList());
     }
 
-    
+    @Override
+    @GET
+    @Path("/{id}")
+    public Response getAWarehouseUnitByID(@PathParam("id") String id) {
+        try {
+            Long longId = Long.parseLong(id);
+            Optional<Warehouse> warehouseOpt = repo.findById(longId);
+            if (warehouseOpt.isPresent()) {
+                return Response.ok(toApiWarehouse(warehouseOpt.get())).build();
+            }
+            return Response.status(404).build();
+        } catch (NumberFormatException e) {
+            return Response.status(400).entity("Invalid ID format").build();
+        }
+    }
+
     @Override
     @POST
     @Path("/")
     public com.warehouse.api.beans.Warehouse createANewWarehouseUnit(@Valid com.warehouse.api.beans.Warehouse request) {
         Warehouse domainWarehouse = new Warehouse(
                 null,
-                request.getBuCode(),  
+                request.getBusinessUnitCode(),  // Fixed: was getBuCode()
                 request.getLocation(),
                 request.getCapacity(),
                 request.getStock(),
@@ -56,8 +71,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
             throw new NotFoundException("Warehouse not found: " + id);
         }
         Warehouse existing = existingOpt.get();
-
-        existing.setBusinessUnitCode(request.getBuCode());  
+        existing.setBusinessUnitCode(request.getBusinessUnitCode());  
         existing.setLocation(request.getLocation());
         existing.setCapacity(request.getCapacity());
         existing.setStock(request.getStock());
@@ -66,26 +80,23 @@ public class WarehouseResourceImpl implements WarehouseResource {
         return Response.ok(toApiWarehouse(existing)).build();
     }
 
-    
     @Override
     @DELETE
     @Path("/{id}")
-    public void archiveAWarehouseUnitByID(String id) {  
-        Long longId = Long.parseLong(id);
-        Optional<Warehouse> warehouseOpt = repo.findById(longId);
+    public void archiveAWarehouseUnitByID(@PathParam("id") Long id) {  
+        Optional<Warehouse> warehouseOpt = repo.findById(id);
         if (warehouseOpt.isEmpty()) {
             throw new NotFoundException("Warehouse not found: " + id);
         }
         Warehouse warehouse = warehouseOpt.get();
         warehouse.archive();
         repo.update(warehouse);
-        
     }
 
     private com.warehouse.api.beans.Warehouse toApiWarehouse(Warehouse w) {
         com.warehouse.api.beans.Warehouse api = new com.warehouse.api.beans.Warehouse();
         api.setId(w.getId().toString());  
-        api.setBuCode(w.getBusinessUnitCode());  
+        api.setBusinessUnitCode(w.getBusinessUnitCode());  // Fixed: was setBuCode()
         api.setLocation(w.getLocation());
         api.setCapacity(w.getCapacity());
         api.setStock(w.getStock());
