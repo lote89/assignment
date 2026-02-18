@@ -33,6 +33,7 @@ public class WarehouseRepository implements WarehouseStore {
         mapToDb(warehouse, db);
         db.persist();
     }
+    
 
     @Override
     @Transactional
@@ -88,7 +89,7 @@ public class WarehouseRepository implements WarehouseStore {
 
     private Warehouse mapToDomain(DbWarehouse db) {
         return new Warehouse(
-            db.getId(),         
+            db.id,         
             db.businessUnitCode, 
             db.location,        
             db.capacity, 
