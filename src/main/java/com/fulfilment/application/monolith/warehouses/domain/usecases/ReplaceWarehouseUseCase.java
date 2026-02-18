@@ -30,7 +30,7 @@ public class ReplaceWarehouseUseCase implements ReplaceWarehouseOperation {
     @Override
     public void replace(DomainWarehouse newWarehouse) {
         // 1. Find existing warehouse
-        Warehouse oldWarehouse = warehouseStore.findByBusinessUnitCode(newWarehouse.getBusinessUnitCode());
+        DomainWarehouse oldWarehouse = warehouseStore.findByBusinessUnitCode(newWarehouse.getBusinessUnitCode());
         if (oldWarehouse == null) {
             throw new WarehouseDomainException("Warehouse not found: " + newWarehouse.getBusinessUnitCode());
         }
