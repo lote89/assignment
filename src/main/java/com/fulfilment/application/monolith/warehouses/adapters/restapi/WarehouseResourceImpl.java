@@ -1,6 +1,6 @@
 package com.fulfilment.application.monolith.warehouses.adapters.restapi;
 
-import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
+import com.fulfilment.application.monolith.warehouses.domain.models.DomainWarehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import com.warehouse.api.WarehouseResource;
 import jakarta.inject.Inject;
@@ -64,7 +64,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
             if (existingOpt.isEmpty()) {
                 throw new NotFoundException("Warehouse not found: " + id);
             }
-            com.fulfilment.application.monolith.warehouses.domain.models.Warehouse existing = existingOpt.get();
+            DomainWarehouse existing = existingOpt.get();
 
             existing.setBusinessUnitCode(request.getBusinessUnitCode());
             existing.setLocation(request.getLocation());
@@ -90,7 +90,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
         }
     }
 
-    private com.warehouse.api.beans.Warehouse toApiWarehouse(com.fulfilment.application.monolith.warehouses.domain.models.Warehouse w) {
+    private com.warehouse.api.beans.Warehouse toApiWarehouse(DomainWarehouse w) {
         com.warehouse.api.beans.Warehouse api = new com.warehouse.api.beans.Warehouse();
         if (w.getId() != null) {
             api.setId(w.getId().toString());
