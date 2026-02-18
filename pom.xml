@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.inventorix</groupId>
     <artifactId>java-code-assignment</artifactId>
@@ -60,7 +61,6 @@
             <artifactId>quarkus-openapi-generator-server</artifactId>
             <version>2.4.7</version>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -70,14 +70,16 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${compiler-plugin.version}</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
-                    <!-- the parameters=true option is critical so that RESTEasy works fine -->
+                    <source>17</source> 
+                    <target>17</target>  
                     <parameters>true</parameters>
+                    <excludes>
+                        <exclude>**/target/generated-sources/**</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
+            
             <plugin>
-                <!-- you need this specific version to integrate with the other build helpers -->
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire-plugin.version}</version>
                 <configuration>
@@ -87,8 +89,8 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+            
             <plugin>
-                <!-- This is what injects the magic Quarkus bytecode -->
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>quarkus-maven-plugin</artifactId>
                 <version>${quarkus.platform.version}</version>
@@ -107,7 +109,6 @@
 
     <profiles>
         <profile>
-            <!-- Optionally activate this profile to compile the demo into native! -->
             <id>native</id>
             <activation>
                 <property>
@@ -147,14 +148,12 @@
             <id>eclipse</id>
             <activation>
                 <property>
-                    <!-- This is a trick to have the profile automatically activated by Eclipse -->
                     <name>m2e.version</name>
                 </property>
             </activation>
             <build>
                 <pluginManagement>
                     <plugins>
-                        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
                         <plugin>
                             <groupId>org.eclipse.m2e</groupId>
                             <artifactId>lifecycle-mapping</artifactId>
@@ -165,12 +164,8 @@
                                         <pluginExecution>
                                             <pluginExecutionFilter>
                                                 <groupId>io.fabric8</groupId>
-                                                <artifactId>
-                                                    docker-maven-plugin
-                                                </artifactId>
-                                                <versionRange>
-                                                    [0.28.0,)
-                                                </versionRange>
+                                                <artifactId>docker-maven-plugin</artifactId>
+                                                <versionRange>[0.28.0,)</versionRange>
                                                 <goals>
                                                     <goal>start</goal>
                                                     <goal>stop</goal>
@@ -184,25 +179,25 @@
                                 </lifecycleMappingMetadata>
                             </configuration>
                         </plugin>
-                                 <plugin>
-                                  <groupId>org.jacoco</groupId>
-                                  <artifactId>jacoco-maven-plugin</artifactId>
-                                  <version>0.8.8</version>
-                                  <executions>
-                                    <execution>
-                                       <goals>
-                                         <goal>prepare-agent</goal>
-                                       </goals>
-                                  </execution>
-                                       <execution>
-                                           <id>report</id>
-                                           <phase>test</phase>
-                                           <goals>
-                                           <goal>report</goal>
-                                          </goals>
-                                      </execution>
-                                     </executions>
-                             </plugin>
+                        <plugin>
+                            <groupId>org.jacoco</groupId>
+                            <artifactId>jacoco-maven-plugin</artifactId>
+                            <version>0.8.8</version>
+                            <executions>
+                                <execution>
+                                    <goals>
+                                        <goal>prepare-agent</goal>
+                                    </goals>
+                                </execution>
+                                <execution>
+                                    <id>report</id>
+                                    <phase>test</phase>
+                                    <goals>
+                                        <goal>report</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
                     </plugins>
                 </pluginManagement>
             </build>
