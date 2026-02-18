@@ -20,7 +20,7 @@ public class ArchiveWarehouseUseCase implements ArchiveWarehouseOperation {
  
   @Override
   public void archive(Warehouse warehouse) {
-    warehouse.archivedAt = ZonedDateTime.now();  
+    warehouse.archive(); 
     warehouseStore.update(warehouse); 
   }
 }
