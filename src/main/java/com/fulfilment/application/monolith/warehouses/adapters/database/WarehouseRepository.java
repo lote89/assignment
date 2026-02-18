@@ -28,7 +28,7 @@ public class WarehouseRepository implements WarehouseStore {
     @Override
     @Transactional
     public void update(DomainWarehouse warehouse) {
-    DbWarehouse db = findDbById(warehouse.getId())
+    DbWarehouse db = .findByCode(warehouseCode)
         .orElseThrow(() -> new IllegalStateException("Warehouse not found"));
     mapToDb(warehouse, db);
     db.persist();
@@ -37,8 +37,8 @@ public class WarehouseRepository implements WarehouseStore {
     @Override
     @Transactional
     public void archive(Long id) {
-        DbWarehouse db = DbWarehouse.findById(id)
-            .orElseThrow(() -> new IllegalStateException("Warehouse not found"));
+        DbWarehouse db = DbWarehouse.findByCode(warehouseCode).firstResultOptional()
+    .orElseThrow(() -> new IllegalArgumentException("Warehouse not found"));
         if (db.archivedAt == null) {
             db.archivedAt = ZonedDateTime.now();
             db.persist();
@@ -87,14 +87,15 @@ public class WarehouseRepository implements WarehouseStore {
     }
 
     private DomainWarehouse mapToDomain(DbWarehouse db) {
-        return new DomainWarehouse(
-            db.id,
-            db.businessUnitCode,
-            db.location,
-            db.capacity,
-            db.stock,
-            db.creationAt,
-            db.archivedAt
-        );
+        DomainWarehouse dw = new DomainWarehouse();
+dw.setId(id);
+dw.setCode(code);
+dw.setName(name);
+dw.setStreetNumber(streetNumber);
+dw.setPostalCode(postalCode);
+dw.setCity(city);
+dw.setCreationAt(creationAt);
+dw.setArchivedAt(archivedAt);
+return dw;
     }
 }
