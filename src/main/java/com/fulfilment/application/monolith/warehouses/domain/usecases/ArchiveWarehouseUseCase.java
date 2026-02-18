@@ -1,6 +1,6 @@
 package com.fulfilment.application.monolith.warehouses.domain.usecases;
 
-import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
+import com.fulfilment.application.monolith.warehouses.domain.models.DomainWarehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.ArchiveWarehouseOperation;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -19,7 +19,7 @@ public class ArchiveWarehouseUseCase implements ArchiveWarehouseOperation {
 
  
   @Override
-  public void archive(Warehouse warehouse) {
+  public void archive(DomainWarehouse warehouse) {
     warehouse.archive(); 
     warehouseStore.update(warehouse); 
   }
