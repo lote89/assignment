@@ -1,74 +1,106 @@
-package com.fulfilment.application.monolith.warehouses.adapters.restapi;
+package com.fulfilment.application.monolith.warehouses.adapters.database;
 
 import com.fulfilment.application.monolith.warehouses.domain.models.Warehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
-import com.warehouse.api.WarehouseResource;
-import jakarta.inject.Inject;
-import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
+import com.fulfilment.application.monolith.warehouses.adapters.domain.exceptions.WarehouseDomainException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Path("/warehouses")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-public class WarehouseResourceImpl implements WarehouseResource {
-
-    @Inject WarehouseStore repo;
+@ApplicationScoped
+public class WarehouseRepository implements WarehouseStore {
 
     @Override
-    @GET @Path("/")
-    public List<com.warehouse.api.beans.Warehouse> listAllWarehousesUnits() {
-        return repo.findAllActive().stream().map(this::toApiWarehouse).collect(Collectors.toList());
-    }
-
-    
-    @Override
-    @POST @Path("/")
-    public com.warehouse.api.beans.Warehouse createANewWarehouseUnit(@Valid com.warehouse.api.beans.Warehouse request) {
-        Warehouse domain = new Warehouse(null, request.getBusinessUnitCode(), request.getLocation(), 
-            request.getCapacity(), request.getStock(), ZonedDateTime.now(), null);
-        repo.create(domain);
-        return toApiWarehouse(domain);
+    @Transactional
+    public void create(Warehouse warehouse) {
+        if (existsByBusinessUnitCode(warehouse.getBusinessUnitCode())) {
+            throw new WarehouseDomainException("Warehouse with this businessUnitCode already exists");
+        }
+        DbWarehouse db = new DbWarehouse();
+        mapToDb(warehouse, db);
+        db.creationAt = ZonedDateTime.now();
+        db.persist();
     }
 
     @Override
-    @PUT @Path("/{id}")
-    public Response replaceWarehouseUnit(@PathParam("id") Long id, @Valid com.warehouse.api.beans.Warehouse request) {
-        Optional<Warehouse> opt = repo.findById(id);
-        if (opt.isEmpty()) throw new NotFoundException();
-        Warehouse w = opt.get();
-        w.setBusinessUnitCode(request.getBusinessUnitCode());
-        w.setLocation(request.getLocation());
-        w.setCapacity(request.getCapacity());
-        w.setStock(request.getStock());
-        repo.update(w);
-        return Response.ok(toApiWarehouse(w)).build();
+    @Transactional
+    public void update(Warehouse warehouse) {
+        
+        Optional<DbWarehouse> opt = findDbById(warehouse.getId());
+        DbWarehouse db = opt.orElse(null);
+        if (db == null) {
+            throw new IllegalStateException("Warehouse not found");
+        }
+        mapToDb(warehouse, db);
+        db.persist();
     }
 
-    
     @Override
-    @DELETE @Path("/{id}")
-    public void archiveAWarehouseUnitByID(@PathParam("id") String id) {  
-        Long lid = Long.parseLong(id);
-        Optional<Warehouse> opt = repo.findById(lid);
-        if (opt.isEmpty()) throw new NotFoundException();
-        Warehouse w = opt.get();
-        w.archive();
-        repo.update(w);
+    @Transactional
+    public void archive(Long id) {
+        DbWarehouse db = DbWarehouse.findById(id)
+            .orElseThrow(() -> new IllegalStateException("Warehouse not found"));
+        if (db.archivedAt == null) {
+            db.archivedAt = ZonedDateTime.now();
+            db.persist();
+        }
     }
 
-    private com.warehouse.api.beans.Warehouse toApiWarehouse(Warehouse w) {
-        com.warehouse.api.beans.Warehouse api = new com.warehouse.api.beans.Warehouse();
-        api.setId(w.getId().toString());  
-        api.setBusinessUnitCode(w.getBusinessUnitCode());  
-        api.setLocation(w.getLocation());
-        api.setCapacity(w.getCapacity());
-        api.setStock(w.getStock());
-        return api;  // 
+    @Override
+    public Optional<Warehouse> findById(Long id) {
+        return findDbById(id).map(this::mapToDomain);
+    }
+
+    @Override
+    public Warehouse findByBusinessUnitCode(String buCode) {
+        DbWarehouse db = DbWarehouse.find("businessUnitCode = ?1 and archivedAt is null", buCode).firstResult();
+        return db != null ? mapToDomain(db) : null;
+    }
+
+    @Override
+    public List<Warehouse> findAllActive() {
+        
+        return DbWarehouse.<DbWarehouse>find("archivedAt is null").list().stream()
+            .map(this::mapToDomain)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public long countActiveByLocation(String location) {
+        return DbWarehouse.count("location = ?1 and archivedAt is null", location);
+    }
+
+    @Override
+    public boolean existsByBusinessUnitCode(String buCode) {
+        return DbWarehouse.count("businessUnitCode = ?1 and archivedAt is null", buCode) > 0;
+    }
+
+    private Optional<DbWarehouse> findDbById(Long id) {
+        return DbWarehouse.find("id = ?1 and archivedAt is null", id).firstResultOptional();
+    }
+
+    private void mapToDb(Warehouse source, DbWarehouse target) {
+        target.businessUnitCode = source.getBusinessUnitCode();
+        target.location = source.getLocation();
+        target.capacity = source.getCapacity();
+        target.stock = source.getStock();
+        target.creationAt = source.getCreationAt();
+        target.archivedAt = source.getArchivedAt();
+    }
+
+    private Warehouse mapToDomain(DbWarehouse db) {
+        
+        return new Warehouse(
+            db.id,
+            db.businessUnitCode,
+            db.location,
+            db.capacity,
+            db.stock,
+            db.creationAt,
+            db.archivedAt
+        );
     }
 }
