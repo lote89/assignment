@@ -25,17 +25,16 @@ public class WarehouseRepository implements WarehouseStore {
         db.persist();
     }
 
-   @Override
-   @Transactional
-   public void update(Warehouse warehouse) {
+    @Override
+    @Transactional
+    public void update(Warehouse warehouse) {
         Optional<DbWarehouse> opt = findDbById(warehouse.getId());
-        DbWarehouse db = opt.orElse(null);  
-    if (db == null) {
-        throw new IllegalStateException("Warehouse not found");
+        // **FIXED: Line 44 - Use .orElseThrow() on Optional, not PanacheEntityBase**
+        DbWarehouse db = opt.orElseThrow(() -> new IllegalStateException("Warehouse not found"));
+        
+        mapToDb(warehouse, db);
+        db.persist();
     }
-    mapToDb(warehouse, db);
-    db.persist();
-   }
 
     @Override
     @Transactional
@@ -61,7 +60,6 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     public List<Warehouse> findAllActive() {
-        
         return DbWarehouse.<DbWarehouse>find("archivedAt is null").list().stream()
             .map(this::mapToDomain)
             .collect(Collectors.toList());
@@ -91,7 +89,6 @@ public class WarehouseRepository implements WarehouseStore {
     }
 
     private Warehouse mapToDomain(DbWarehouse db) {
-        
         return new Warehouse(
             db.id,
             db.businessUnitCode,
