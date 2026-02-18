@@ -7,7 +7,6 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -29,14 +28,13 @@ public class WarehouseResourceImpl implements WarehouseResource {
                 .collect(Collectors.toList());
     }
 
-
     @Override
     @GET
     @Path("/{id}")
     public com.warehouse.api.beans.Warehouse getAWarehouseUnitByID(@PathParam("id") String id) {
         try {
             Long longId = Long.parseLong(id);
-            Optional<Warehouse> warehouseOpt = repo.findById(longId);
+            Optional<com.fulfilment.application.monolith.warehouses.domain.models.Warehouse> warehouseOpt = repo.findById(longId);
             return warehouseOpt.map(this::toApiWarehouse).orElse(null);
         } catch (NumberFormatException e) {
             return null;
@@ -47,7 +45,9 @@ public class WarehouseResourceImpl implements WarehouseResource {
     @POST
     @Path("/")
     public com.warehouse.api.beans.Warehouse createANewWarehouseUnit(@Valid com.warehouse.api.beans.Warehouse request) {
-        Warehouse domainWarehouse = new Warehouse(
+        
+        com.fulfilment.application.monolith.warehouses.domain.models.Warehouse domainWarehouse = 
+            new com.fulfilment.application.monolith.warehouses.domain.models.Warehouse(
                 null,
                 request.getBusinessUnitCode(),
                 request.getLocation(),
@@ -55,7 +55,7 @@ public class WarehouseResourceImpl implements WarehouseResource {
                 request.getStock(),
                 ZonedDateTime.now(),
                 null
-        );
+            );
         repo.create(domainWarehouse);
         return toApiWarehouse(domainWarehouse);
     }
@@ -66,11 +66,11 @@ public class WarehouseResourceImpl implements WarehouseResource {
     public com.warehouse.api.beans.Warehouse replaceWarehouseUnit(@PathParam("id") String id, @Valid com.warehouse.api.beans.Warehouse request) {
         try {
             Long longId = Long.parseLong(id);
-            Optional<Warehouse> existingOpt = repo.findById(longId);
+            Optional<com.fulfilment.application.monolith.warehouses.domain.models.Warehouse> existingOpt = repo.findById(longId);
             if (existingOpt.isEmpty()) {
                 throw new NotFoundException("Warehouse not found: " + id);
             }
-            Warehouse existing = existingOpt.get();
+            com.fulfilment.application.monolith.warehouses.domain.models.Warehouse existing = existingOpt.get();
 
             existing.setBusinessUnitCode(request.getBusinessUnitCode());
             existing.setLocation(request.getLocation());
@@ -84,25 +84,19 @@ public class WarehouseResourceImpl implements WarehouseResource {
         }
     }
 
-    
     @Override
     @DELETE
     @Path("/{id}")
     public void archiveAWarehouseUnitByID(@PathParam("id") String id) {
         try {
             Long longId = Long.parseLong(id);
-            Optional<Warehouse> warehouseOpt = repo.findById(longId);
-            if (warehouseOpt.isEmpty()) {
-                throw new NotFoundException("Warehouse not found: " + id);
-            }
-            Warehouse warehouse = warehouseOpt.get();
-            repo.archive(longId);  // Use repo.archive(Long)
+            repo.archive(longId);
         } catch (NumberFormatException e) {
             throw new BadRequestException("Invalid ID format");
         }
     }
 
-    private com.warehouse.api.beans.Warehouse toApiWarehouse(Warehouse w) {
+    private com.warehouse.api.beans.Warehouse toApiWarehouse(com.fulfilment.application.monolith.warehouses.domain.models.Warehouse w) {
         com.warehouse.api.beans.Warehouse api = new com.warehouse.api.beans.Warehouse();
         if (w.getId() != null) {
             api.setId(w.getId().toString());
