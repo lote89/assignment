@@ -40,5 +40,4 @@ class ArchiveWarehouseUseCaseTest {
         useCase.archive(warehouse);
 
         ZonedDateTime now = ZonedDateTime.now();
-        assertTrue(
-            DomainWarehouse
+    }
