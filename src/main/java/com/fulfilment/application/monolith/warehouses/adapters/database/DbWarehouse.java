@@ -40,9 +40,9 @@ public class DbWarehouse extends PanacheEntity {
         return db;
     }
 
-   public static DomainWarehouse toDomain(DbWarehouse source) {
+  public static DomainWarehouse toDomain(DbWarehouse source) {
     return new DomainWarehouse(
-        source.id,
+        source.id.toString(),  // Long → String
         source.businessUnitCode,
         source.location,
         source.capacity,
@@ -51,4 +51,5 @@ public class DbWarehouse extends PanacheEntity {
         source.archivedAt
     );
 }
+
 }
