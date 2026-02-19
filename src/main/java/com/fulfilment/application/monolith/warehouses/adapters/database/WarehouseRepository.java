@@ -2,12 +2,10 @@ package com.fulfilment.application.monolith.warehouses.adapters.database;
 
 import com.fulfilment.application.monolith.warehouses.domain.models.DomainWarehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
-import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class WarehouseRepository implements WarehouseStore {
@@ -21,19 +19,23 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     public Optional<DomainWarehouse> findById(Long id) {
-        return DbWarehouse.findByIdOptional(id).map(DbWarehouse::toDomain);
+        Optional<DbWarehouse> db = DbWarehouse.findByIdOptional(id);
+        return db.map(DwMapper::toDomain);
     }
 
     @Override
     public List<DomainWarehouse> findAllActive() {
-        return DbWarehouse.stream("archivedAt is null")
-            .map(DbWarehouse::toDomain)
-            .collect(Collectors.toList());
+        return DbWarehouse.stream("archivedAt is null").map(DwMapper::toDomain).collect(Collectors.toList());
     }
 
     @Override
     public long countActiveByLocation(String location) {
         return DbWarehouse.count("location = ?1 and archivedAt is null", location);
+    }
+
+    @Override
+    public boolean existsByBusinessUnitCode(String businessUnitCode) {
+        return DbWarehouse.count("businessUnitCode = ?1", businessUnitCode) > 0;
     }
 
     @Override
