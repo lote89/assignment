@@ -40,16 +40,17 @@ public class DbWarehouse extends PanacheEntity {
         return db;
     }
 
-    // ADD THIS METHOD - this was missing!
     public static DomainWarehouse toDomain(DbWarehouse source) {
-        if (source == null) return null;
-        return new DomainWarehouse(
-            source.id, 
-            source.businessUnitCode, 
-            source.location, 
-            null, null, // streetNumber, postalCode not in DbWarehouse
-            source.creationAt, 
-            source.archivedAt
-        );
-    }
+    if (source == null) return null;
+    return new DomainWarehouse(
+        source.id,
+        source.businessUnitCode,  
+        source.location,           
+        null,                     
+        null,                     
+        "",                       
+        source.creationAt,
+        source.archivedAt
+    );
+}
 }
