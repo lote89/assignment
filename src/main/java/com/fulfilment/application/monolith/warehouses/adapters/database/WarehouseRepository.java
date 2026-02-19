@@ -31,9 +31,8 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     public List<DomainWarehouse> findAllActive() {
-        // FIXED: Use .list() directly - returns List<DbWarehouse>
-        List<DbWarehouse> dbWarehouses = DbWarehouse.stream("archivedAt is null").list();
-        return dbWarehouses.stream()
+        // FIXED: stream() returns Stream - use collect() directly, no .list()
+        return DbWarehouse.stream("archivedAt is null")
             .map(DbWarehouse::toDomain)
             .collect(Collectors.toList());
     }
@@ -63,10 +62,5 @@ public class WarehouseRepository implements WarehouseStore {
             db.persist();
         }
     }
-
-    @Override
-    @Transactional
-    public void delete(Long id) {
-        DbWarehouse.deleteById(id);
-    }
+    // REMOVED delete() method - WarehouseStore doesn't have it
 }
