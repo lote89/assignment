@@ -28,14 +28,14 @@ public class DomainWarehouse {
     public void setCreationAt(ZonedDateTime creationAt) {
     this.creationAt = creationAt;
 }
-    public DomainWarehouse(Long id, String code, String name, Integer streetNumber, 
-                      Integer postalCode, String city, ZonedDateTime creationAt, 
-                      ZonedDateTime archivedAt) {
+   public DomainWarehouse(Long id, String businessUnitCode, String location, 
+                      Integer capacity, Integer stock, String city, 
+                      ZonedDateTime creationAt, ZonedDateTime archivedAt) {
     this.id = id;
-    this.code = code;
-    this.name = name;
-    this.streetNumber = streetNumber;
-    this.postalCode = postalCode;
+    this.businessUnitCode = businessUnitCode; 
+    this.location = location;
+    this.capacity = capacity;
+    this.stock = stock;
     this.city = city;
     this.creationAt = creationAt;
     this.archivedAt = archivedAt;
