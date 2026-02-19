@@ -2,6 +2,7 @@ package com.fulfilment.application.monolith.warehouses.adapters.database;
 
 import com.fulfilment.application.monolith.warehouses.domain.models.DomainWarehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -20,21 +21,24 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     public Optional<DomainWarehouse> findById(Long id) {
-        return DbWarehouse.findByIdOptional(id).map(DbWarehouse::toDomain);
+        return Optional.ofNullable(DbWarehouse.findById(id))
+                      .map(DbWarehouse::toDomain);
     }
 
     @Override
-    public Optional<DomainWarehouse> findByBusinessUnitCode(String businessUnitCode) {
-        return DbWarehouse.find("businessUnitCode = ?1", businessUnitCode)
-            .firstResultOptional()
-            .map(DbWarehouse::toDomain);
+    public DomainWarehouse findByBusinessUnitCode(String businessUnitCode) {
+        DbWarehouse db = DbWarehouse.find("businessUnitCode = ?1", businessUnitCode)
+                                   .firstResult();
+        return db != null ? DbWarehouse.toDomain(db) : null;
     }
 
     @Override
     public List<DomainWarehouse> findAllActive() {
         return DbWarehouse.stream("archivedAt is null")
-            .map(DbWarehouse::toDomain)
-            .collect(Collectors.toList());
+                         .list()
+                         .stream()
+                         .map(DbWarehouse::toDomain)
+                         .collect(Collectors.toList());
     }
 
     @Override
@@ -50,18 +54,20 @@ public class WarehouseRepository implements WarehouseStore {
     @Override
     @Transactional
     public void update(DomainWarehouse warehouse) {
-        DbWarehouse.findByIdOptional(warehouse.getId())
-            .orElseThrow(() -> new IllegalArgumentException("Warehouse not found"));
-        DbWarehouse.fromDomain(warehouse).persist();
+        DbWarehouse db = DbWarehouse.findById(warehouse.getId());
+        if (db != null) {
+            DbWarehouse.fromDomain(warehouse).persist();
+        }
     }
 
     @Override
     @Transactional
     public void archive(Long id) {
-        DbWarehouse db = DbWarehouse.findByIdOptional(id)
-            .orElseThrow(() -> new IllegalArgumentException("Warehouse not found"));
-        db.archivedAt = java.time.ZonedDateTime.now();
-        db.persist();
+        DbWarehouse db = DbWarehouse.findById(id);
+        if (db != null) {
+            db.archivedAt = java.time.ZonedDateTime.now();
+            db.persist();
+        }
     }
 
     @Override
@@ -70,3 +76,4 @@ public class WarehouseRepository implements WarehouseStore {
         DbWarehouse.deleteById(id);
     }
 }
+
