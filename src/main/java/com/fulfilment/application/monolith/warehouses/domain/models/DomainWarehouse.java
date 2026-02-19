@@ -28,9 +28,9 @@ public class DomainWarehouse {
     public void setCreationAt(ZonedDateTime creationAt) {
     this.creationAt = creationAt;
 }
-   public DomainWarehouse(Long id, String businessUnitCode, String location, Integer capacity, 
+   public DomainWarehouse(String id, String businessUnitCode, String location, Integer capacity, 
                       Integer stock, ZonedDateTime creationAt, ZonedDateTime archivedAt) {
-    this.id = id;
+    this.id = id;  
     this.businessUnitCode = businessUnitCode;
     this.location = location;
     this.capacity = capacity;
