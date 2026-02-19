@@ -45,8 +45,8 @@ public class DbWarehouse extends PanacheEntity {
         source.id,
         source.businessUnitCode,
         source.location,
-        source.capacity,      
-        source.stock,         
+        source.capacity,
+        source.stock,
         source.creationAt,
         source.archivedAt
     );
