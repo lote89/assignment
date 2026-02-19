@@ -18,7 +18,7 @@ public class WarehouseRepository implements WarehouseStore {
     }
 
     @Override
-    public Optional<DomainWarehouse> findById(Long id) {  // Changed String to Long
+    public Optional<DomainWarehouse> findById(Long id) {
         DbWarehouse db = DbWarehouse.findById(id);
         return db != null ? Optional.of(DbWarehouse.toDomain(db)) : Optional.empty();
     }
@@ -31,10 +31,9 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     public List<DomainWarehouse> findAllActive() {
-        // Fixed: Removed extra .stream() after .list()
-        return DbWarehouse.stream("archivedAt is null")
-            .list()
-            .stream()
+        // FIXED: Use .list() directly - returns List<DbWarehouse>
+        List<DbWarehouse> dbWarehouses = DbWarehouse.stream("archivedAt is null").list();
+        return dbWarehouses.stream()
             .map(DbWarehouse::toDomain)
             .collect(Collectors.toList());
     }
@@ -57,7 +56,7 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     @Transactional
-    public void archive(Long id) {  // Changed String to Long
+    public void archive(Long id) {
         DbWarehouse db = DbWarehouse.findById(id);
         if (db != null) {
             db.archivedAt = java.time.ZonedDateTime.now();
@@ -67,7 +66,7 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     @Transactional
-    public void delete(Long id) {  // Changed String to Long
+    public void delete(Long id) {
         DbWarehouse.deleteById(id);
     }
 }
