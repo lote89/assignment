@@ -2,13 +2,11 @@ package com.fulfilment.application.monolith.warehouses.adapters.database;
 
 import com.fulfilment.application.monolith.warehouses.domain.models.DomainWarehouse;
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.time.ZonedDateTime;
 
 @ApplicationScoped
 public class WarehouseRepository implements WarehouseStore {
@@ -20,25 +18,24 @@ public class WarehouseRepository implements WarehouseStore {
     }
 
     @Override
-    public Optional<DomainWarehouse> findById(Long id) {
-        return Optional.ofNullable(DbWarehouse.findById(id))
-                      .map(DbWarehouse::toDomain);
+    public Optional<DomainWarehouse> findById(String id) {  // String ID
+        DbWarehouse db = DbWarehouse.findById(id);
+        return db != null ? Optional.of(DbWarehouse.toDomain(db)) : Optional.empty();
     }
 
     @Override
     public DomainWarehouse findByBusinessUnitCode(String businessUnitCode) {
-        DbWarehouse db = DbWarehouse.find("businessUnitCode = ?1", businessUnitCode)
-                                   .firstResult();
+        DbWarehouse db = DbWarehouse.find("businessUnitCode = ?1", businessUnitCode).firstResult();
         return db != null ? DbWarehouse.toDomain(db) : null;
     }
 
     @Override
     public List<DomainWarehouse> findAllActive() {
         return DbWarehouse.stream("archivedAt is null")
-                         .list()
-                         .stream()
-                         .map(DbWarehouse::toDomain)
-                         .collect(Collectors.toList());
+            .list()
+            .stream()
+            .map(db -> DbWarehouse.toDomain(db))  // Lambda, not method ref
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -54,15 +51,12 @@ public class WarehouseRepository implements WarehouseStore {
     @Override
     @Transactional
     public void update(DomainWarehouse warehouse) {
-        DbWarehouse db = DbWarehouse.findById(warehouse.getId());
-        if (db != null) {
-            DbWarehouse.fromDomain(warehouse).persist();
-        }
+        DbWarehouse.fromDomain(warehouse).persist();
     }
 
     @Override
     @Transactional
-    public void archive(Long id) {
+    public void archive(String id) {  // String ID
         DbWarehouse db = DbWarehouse.findById(id);
         if (db != null) {
             db.archivedAt = java.time.ZonedDateTime.now();
@@ -72,8 +66,7 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     @Transactional
-    public void delete(Long id) {
+    public void delete(String id) {  // String ID
         DbWarehouse.deleteById(id);
     }
 }
-
