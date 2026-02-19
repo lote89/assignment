@@ -18,24 +18,21 @@ public class WarehouseRepository implements WarehouseStore {
     }
 
     @Override
-    public Optional<DomainWarehouse> findById(String id) {  // String ID
+    public Optional<DomainWarehouse> findById(String id) {
         DbWarehouse db = DbWarehouse.findById(id);
-        return db != null ? Optional.of(DbWarehouse.toDomain(db)) : Optional.empty();
+        return Optional.ofNullable(db).map(DwMapper::toDomain);
     }
 
     @Override
     public DomainWarehouse findByBusinessUnitCode(String businessUnitCode) {
-        DbWarehouse db = DbWarehouse.find("businessUnitCode = ?1", businessUnitCode).firstResult();
-        return db != null ? DbWarehouse.toDomain(db) : null;
+        DbWarehouse db = DbWarehouse.find("businessUnitCode", businessUnitCode).firstResult();
+        return DwMapper.toDomain(db);
     }
 
     @Override
     public List<DomainWarehouse> findAllActive() {
-        return DbWarehouse.stream("archivedAt is null")
-            .list()
-            .stream()
-            .map(db -> DbWarehouse.toDomain(db))  // Lambda, not method ref
-            .collect(Collectors.toList());
+        List<DbWarehouse> dbs = DbWarehouse.list("archivedAt is null");
+        return dbs.stream().map(DwMapper::toDomain).collect(Collectors.toList());
     }
 
     @Override
@@ -56,7 +53,7 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     @Transactional
-    public void archive(String id) {  // String ID
+    public void archive(String id) {
         DbWarehouse db = DbWarehouse.findById(id);
         if (db != null) {
             db.archivedAt = java.time.ZonedDateTime.now();
@@ -66,7 +63,7 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     @Transactional
-    public void delete(String id) {  // String ID
+    public void delete(String id) {
         DbWarehouse.deleteById(id);
     }
 }
