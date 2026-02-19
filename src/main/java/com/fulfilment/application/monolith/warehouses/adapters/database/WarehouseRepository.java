@@ -4,21 +4,29 @@ import com.fulfilment.application.monolith.warehouses.domain.models.DomainWareho
 import com.fulfilment.application.monolith.warehouses.domain.ports.WarehouseStore;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class WarehouseRepository implements WarehouseStore, PanacheRepository<DbWarehouse> {
 
     @Override
-    public DomainWarehouse create(DomainWarehouse warehouse) {
+    public void create(DomainWarehouse warehouse) {  // VOID return
         DbWarehouse db = DbWarehouse.fromDomain(warehouse);
         db.persist();
-        return DbWarehouse.toDomain(db);
     }
 
     @Override
     public Optional<DomainWarehouse> findById(Long id) {
         return findByIdOptional(id).map(DbWarehouse::toDomain);
+    }
+
+    @Override
+    public List<DomainWarehouse> findAllActive() {
+        return stream("archivedAt is null")
+            .map(DbWarehouse::toDomain)
+            .collect(Collectors.toList());
     }
 
     @Override
