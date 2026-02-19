@@ -41,3 +41,4 @@ class ArchiveWarehouseUseCaseTest {
 
         ZonedDateTime now = ZonedDateTime.now();
     }
+}
