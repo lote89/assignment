@@ -6,6 +6,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.time.ZonedDateTime;
 
 @ApplicationScoped
 public class WarehouseRepository implements WarehouseStore {
@@ -13,19 +15,26 @@ public class WarehouseRepository implements WarehouseStore {
     @Override
     @Transactional
     public void create(DomainWarehouse warehouse) {
-        DbWarehouse db = DbWarehouse.fromDomain(warehouse);
-        db.persist();
+        DbWarehouse.fromDomain(warehouse).persist();
     }
 
     @Override
     public Optional<DomainWarehouse> findById(Long id) {
-        Optional<DbWarehouse> db = DbWarehouse.findByIdOptional(id);
-        return db.map(DwMapper::toDomain);
+        return DbWarehouse.findByIdOptional(id).map(DbWarehouse::toDomain);
+    }
+
+    @Override
+    public Optional<DomainWarehouse> findByBusinessUnitCode(String businessUnitCode) {
+        return DbWarehouse.find("businessUnitCode = ?1", businessUnitCode)
+            .firstResultOptional()
+            .map(DbWarehouse::toDomain);
     }
 
     @Override
     public List<DomainWarehouse> findAllActive() {
-        return DbWarehouse.stream("archivedAt is null").map(DwMapper::toDomain).collect(Collectors.toList());
+        return DbWarehouse.stream("archivedAt is null")
+            .map(DbWarehouse::toDomain)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -41,7 +50,7 @@ public class WarehouseRepository implements WarehouseStore {
     @Override
     @Transactional
     public void update(DomainWarehouse warehouse) {
-        DbWarehouse db = DbWarehouse.findByIdOptional(warehouse.getId())
+        DbWarehouse.findByIdOptional(warehouse.getId())
             .orElseThrow(() -> new IllegalArgumentException("Warehouse not found"));
         DbWarehouse.fromDomain(warehouse).persist();
     }
