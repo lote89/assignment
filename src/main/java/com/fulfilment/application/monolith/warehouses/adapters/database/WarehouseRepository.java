@@ -28,18 +28,17 @@ public class WarehouseRepository implements WarehouseStore {
      @Override
      public void update(DomainWarehouse warehouse) {
           DbWarehouse db = DbWarehouse.fromDomain(warehouse);
-      db.persistOrUpdate();
+      db.persist();
      }
     
     @Override
     @Transactional
     public void archive(Long id) {
-        DbWarehouse db = DbWarehouse.findByCode(warehouseCode).firstResultOptional()
-    .orElseThrow(() -> new IllegalArgumentException("Warehouse not found"));
-        if (db.archivedAt == null) {
-            db.archivedAt = ZonedDateTime.now();
-            db.persist();
-        }
+       public Optional<DomainWarehouse> findByCode(String warehouseCode) {
+    return find("businessUnitCode", warehouseCode)
+        .firstResultOptional()
+        .map(DbWarehouse::toDomain);
+}
     }
 
     @Override
@@ -86,13 +85,7 @@ public class WarehouseRepository implements WarehouseStore {
     private DomainWarehouse mapToDomain(DbWarehouse db) {
         DomainWarehouse dw = new DomainWarehouse();
 dw.setId(id);
-dw.setCode(code);
-dw.setName(name);
-dw.setStreetNumber(streetNumber);
-dw.setPostalCode(postalCode);
-dw.setCity(city);
-dw.setCreationAt(creationAt);
-dw.setArchivedAt(archivedAt);
+
 return dw;
     }
 }
