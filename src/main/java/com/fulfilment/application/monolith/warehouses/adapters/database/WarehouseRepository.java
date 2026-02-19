@@ -6,6 +6,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class WarehouseRepository implements WarehouseStore {
@@ -30,12 +31,12 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     public List<DomainWarehouse> findAllActive() {
-        // FIXED: Use find() instead of stream() - no type issues
+        // FINAL FIX: Use lambda expression instead of method reference
         return DbWarehouse.find("archivedAt is null")
             .list()
             .stream()
-            .map(db -> DbWarehouse.toDomain(db))
-            .collect(java.util.stream.Collectors.toList());
+            .map(db -> DbWarehouse.toDomain((DbWarehouse) db))  // Explicit cast + lambda
+            .collect(Collectors.toList());
     }
 
     @Override
