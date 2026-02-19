@@ -31,8 +31,9 @@ public class WarehouseRepository implements WarehouseStore {
 
     @Override
     public List<DomainWarehouse> findAllActive() {
-        // FIXED: stream() returns Stream - use collect() directly, no .list()
-        return DbWarehouse.stream("archivedAt is null")
+        // FIXED: Cast stream to correct type before mapping
+        return ((List<DbWarehouse>) DbWarehouse.stream("archivedAt is null").collect(Collectors.toList()))
+            .stream()
             .map(DbWarehouse::toDomain)
             .collect(Collectors.toList());
     }
@@ -62,5 +63,4 @@ public class WarehouseRepository implements WarehouseStore {
             db.persist();
         }
     }
-    // REMOVED delete() method - WarehouseStore doesn't have it
 }
